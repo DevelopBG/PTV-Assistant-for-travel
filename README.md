@@ -82,7 +82,7 @@ PTV Assistant finds optimal routes between stations using real-time and schedule
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/caprihan/PTV_Assistant.git
+   git clone https://github.com/DevelopBG/PTV-Assistant-for-travel.git
    cd PTV_Assistant
    ```
 
