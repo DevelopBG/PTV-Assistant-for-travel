@@ -1,0 +1,60 @@
+# Personal Claude Code Preferences
+
+This file contains YOUR personal preferences. It's gitignored so it won't affect your teammate.
+
+Copy this file to `.claude/CLAUDE.local.md` or `CLAUDE.local.md` in project root, then customize.
+
+---
+
+## Your Identity
+
+```markdown
+# My Info
+- **Name**: [Your Name]
+- **Timezone**: [Your Timezone]
+- **Working Hours**: [Your typical shift hours]
+```
+
+## Your Preferences
+
+### Communication Style
+- Prefer concise explanations
+- Show code examples over descriptions
+- Use Australian English spelling
+
+### Code Style
+- 4 spaces for indentation
+- Type hints on all functions
+- Docstrings in Google style
+
+### Testing Preferences
+- Always run tests before committing
+- Prefer pytest over unittest
+- Coverage threshold: 95%
+
+### Git Preferences
+- Commit messages: conventional commits style
+- Always pull before starting work
+- Prefer rebase over merge
+
+---
+
+## Personal Notes
+
+Add any personal reminders or context here:
+
+- 
+- 
+- 
+
+---
+
+## Quick Access
+
+Frequently used commands for YOUR workflow:
+
+```bash
+# Your common commands here
+pytest -x  # Stop on first failure
+git log --oneline -10
+```

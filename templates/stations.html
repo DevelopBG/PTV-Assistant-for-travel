@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Stations - PTV Journey Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .top-nav {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-nav h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .stations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .station-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .station-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .station-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .station-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .platform-info {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        
+        .back-link {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .stats {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            .stations-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <h1>PTV Journey Planner</h1>
+        <div class="nav-links">
+            <a href="/">Journey Planner</a>
+            <a href="/map">Plan on Map</a>
+            <a href="/live">Live Vehicles</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/stations" class="active">Stations</a>
+            <a href="/about">About</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h2>Available Stations</h2>
+            <p>Melbourne Public Transport Network</p>
+        </div>
+        
+        <div class="search-section">
+            <input type="text" id="searchBox" class="search-box" placeholder="🔍 Search stations...">
+        </div>
+        
+        <div class="stats">
+            <span id="stationCount">Loading stations...</span>
+        </div>
+        
+        <div id="stationsGrid" class="stations-grid">
+            <!-- Stations will be loaded here -->
+        </div>
+        
+        <div class="back-link">
+            <a href="/">Journey Planner</a> |
+            <a href="/map">Plan on Map</a> |
+            <a href="/live">Live Vehicles</a> |
+            <a href="/dashboard">Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        let allStations = [];
+        
+        // Load stations when page loads
+        document.addEventListener('DOMContentLoaded', loadStations);
+        
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredStations = allStations.filter(station => 
+                station.name.toLowerCase().includes(searchTerm)
+            );
+            displayStations(filteredStations);
+        });
+        
+        async function loadStations() {
+            try {
+                const response = await fetch('/api/stations');
+                allStations = await response.json();
+                displayStations(allStations);
+                updateStats(allStations.length);
+            } catch (error) {
+                document.getElementById('stationsGrid').innerHTML = 
+                    '<div style="text-align: center; color: #c62828; padding: 40px;">Failed to load stations</div>';
+            }
+        }
+        
+        function displayStations(stations) {
+            const grid = document.getElementById('stationsGrid');
+            
+            if (stations.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; color: #666; padding: 40px;">No stations found</div>';
+                return;
+            }
+            
+            const html = stations.map(station => `
+                <div class="station-card">
+                    <div class="station-name">${station.name}</div>
+                    <div class="station-details">
+                        📍 ${station.lat.toFixed(4)}, ${station.lon.toFixed(4)}
+                    </div>
+                    <div class="platform-info">${station.platform}</div>
+                </div>
+            `).join('');
+            
+            grid.innerHTML = html;
+        }
+        
+        function updateStats(count) {
+            document.getElementById('stationCount').textContent = 
+                `${count} stations available`;
+        }
+    </script>
+</body>
+</html>

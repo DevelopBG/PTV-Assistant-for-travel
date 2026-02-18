@@ -1,0 +1,46 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-8.3.4, pluggy-1.5.0 -- /opt/anaconda3/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/mohammed/Downloads/PTV_Assistant-main
+plugins: mock-3.15.1, anyio-4.11.0, langsmith-0.3.45, requests-mock-1.12.1, cov-7.0.0
+collecting ... collected 21 items
+
+tests/test_realtime/test_feed_fetcher.py::TestGTFSRealtimeFetcherInit::test_init_with_valid_api_key PASSED [  4%]
+tests/test_realtime/test_feed_fetcher.py::TestGTFSRealtimeFetcherInit::test_init_with_custom_timeout PASSED [  9%]
+tests/test_realtime/test_feed_fetcher.py::TestGTFSRealtimeFetcherInit::test_init_without_api_key PASSED [ 14%]
+tests/test_realtime/test_feed_fetcher.py::TestGTFSRealtimeFetcherInit::test_init_with_none_api_key PASSED [ 19%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchFeed::test_fetch_feed_success PASSED [ 23%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchFeed::test_fetch_feed_with_correct_headers PASSED [ 28%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchFeed::test_fetch_feed_http_error PASSED [ 33%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchFeed::test_fetch_feed_timeout PASSED [ 38%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchFeed::test_fetch_feed_connection_error PASSED [ 42%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchFeed::test_fetch_feed_invalid_protobuf PASSED [ 47%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchFeed::test_fetch_feed_empty_response PASSED [ 52%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchTripUpdates::test_fetch_trip_updates_metro PASSED [ 57%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchTripUpdates::test_fetch_trip_updates_vline PASSED [ 61%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchTripUpdates::test_fetch_trip_updates_invalid_mode PASSED [ 66%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchVehiclePositions::test_fetch_vehicle_positions_metro PASSED [ 71%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchVehiclePositions::test_fetch_vehicle_positions_invalid_mode PASSED [ 76%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchServiceAlerts::test_fetch_service_alerts_metro PASSED [ 80%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchServiceAlerts::test_fetch_service_alerts_vline PASSED [ 85%]
+tests/test_realtime/test_feed_fetcher.py::TestFetchServiceAlerts::test_fetch_service_alerts_invalid_mode PASSED [ 90%]
+tests/test_realtime/test_feed_fetcher.py::TestFeedURLs::test_feed_urls_structure PASSED [ 95%]
+tests/test_realtime/test_feed_fetcher.py::TestFeedURLs::test_feed_urls_are_valid PASSED [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.13.5-final-0 _______________
+
+Name                           Stmts   Miss  Cover   Missing
+------------------------------------------------------------
+src/__init__.py                    0      0   100%
+src/api/__init__.py                0      0   100%
+src/cli/__init__.py                0      0   100%
+src/data/__init__.py               0      0   100%
+src/graph/__init__.py              0      0   100%
+src/realtime/__init__.py           0      0   100%
+src/realtime/feed_fetcher.py      46      0   100%
+src/routing/__init__.py            0      0   100%
+------------------------------------------------------------
+TOTAL                             46      0   100%
+Coverage HTML written to dir htmlcov
+============================== 21 passed in 0.08s ==============================

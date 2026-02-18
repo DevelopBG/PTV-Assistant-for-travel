@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - PTV Transit Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 10px;
+        }
+
+        .hero .subtitle {
+            font-size: 1em;
+            opacity: 0.85;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .tech-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .tech-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .tech-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tech-card li {
+            padding: 8px 0;
+            color: #666;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tech-card li:last-child {
+            border-bottom: none;
+        }
+
+        .api-section {
+            margin-bottom: 40px;
+        }
+
+        .api-section h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .api-section > p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.05em;
+        }
+
+        .api-category {
+            margin-bottom: 30px;
+        }
+
+        .api-category h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .api-card {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .api-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .api-method {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .method-get {
+            background: #61affe;
+            color: white;
+        }
+
+        .method-post {
+            background: #49cc90;
+            color: white;
+        }
+
+        .api-path {
+            font-family: 'Courier New', monospace;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .api-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .api-params {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .api-params strong {
+            color: #2c3e50;
+        }
+
+        .swagger-container {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 30px;
+            background: white;
+        }
+
+        .swagger-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .swagger-header h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .swagger-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .swagger-nav button {
+            padding: 8px 15px;
+            border: 1px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .swagger-nav button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .swagger-nav a {
+            text-decoration: none;
+        }
+
+        .btn-open-tab {
+            background: #28a745 !important;
+            color: white !important;
+            border-color: #28a745 !important;
+        }
+
+        .btn-open-tab:hover {
+            background: #218838 !important;
+        }
+
+        .swagger-container iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+            display: block;
+        }
+
+        .code-example {
+            background: #2c3e50;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            margin: 15px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-example .comment {
+            color: #7fb3d5;
+        }
+
+        .code-example .keyword {
+            color: #c678dd;
+        }
+
+        .code-example .string {
+            color: #98c379;
+        }
+
+        .setup-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .setup-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .setup-section ol, .setup-section ul {
+            margin-left: 20px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .setup-section li {
+            margin-bottom: 10px;
+        }
+
+        .setup-section code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+            font-size: 0.9em;
+        }
+
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .info-box strong {
+            color: #1976d2;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .warning-box strong {
+            color: #f57c00;
+        }
+
+        .link-button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            transition: background 0.2s;
+        }
+
+        .link-button:hover {
+            background: #5a6fd8;
+        }
+
+        .link-button.secondary {
+            background: #6c757d;
+        }
+
+        .link-button.secondary:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .hero p {
+                font-size: 1.1em;
+            }
+
+            .tabs {
+                flex-direction: column;
+                border-bottom: none;
+            }
+
+            .tab {
+                border-bottom: 1px solid #e0e0e0;
+                border-left: 3px solid transparent;
+                text-align: left;
+            }
+
+            .tab.active {
+                border-bottom: 1px solid #e0e0e0;
+                border-left: 3px solid #667eea;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tech-stack {
+                grid-template-columns: 1fr;
+            }
+
+            .swagger-container iframe {
+                height: 600px;
+            }
+
+            .api-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PTV Transit Assistant</h1>
+        <div class="nav-links">
+            <a href="/">Journey Planner</a>
+            <a href="/map">Plan on Map</a>
+            <a href="/live">Live Vehicles</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/stations">Stations</a>
+            <a href="/about" class="active">About</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h1>PTV Transit Assistant</h1>
+            <p>Multi-Modal Journey Planner for Melbourne's Public Transport</p>
+            <p class="subtitle">Python-based journey planning using PTV's GTFS datasets with real-time integration</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('project-info', event)">Project Info</button>
+            <button class="tab" onclick="switchTab('input-apis', event)">GTFS Input APIs</button>
+            <button class="tab" onclick="switchTab('output-apis', event)">Output APIs</button>
+            <button class="tab" onclick="switchTab('setup', event)">Setup Guide</button>
+        </div>
+
+        <!-- Project Info Tab -->
+        <div id="project-info" class="tab-content active">
+            <h2>About This Project</h2>
+            <p>The PTV Transit Assistant is a comprehensive journey planning system for Melbourne's public transport network. It leverages GTFS (General Transit Feed Specification) data from Public Transport Victoria (PTV) to provide accurate, multi-modal route planning with real-time updates.</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚆</div>
+                    <h3>Multi-Modal Routing</h3>
+                    <p>Plan journeys across trains, trams, buses, and V/Line regional services with intelligent transfer handling.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3>Journey Planning</h3>
+                    <p>Advanced Connection Scan Algorithm (CSA) for optimal route finding with customizable transfer limits.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Real-Time Data</h3>
+                    <p>Integration with PTV's GTFS Realtime feeds for live vehicle positions, delays, and service disruptions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Fuzzy Stop Search</h3>
+                    <p>Intelligent stop name matching with fuzzy search capabilities for easy station lookup.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>Live Vehicle Tracking</h3>
+                    <p>Track vehicles in real-time across all transport modes with map visualization.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚠️</div>
+                    <h3>Service Alerts</h3>
+                    <p>Stay informed about service disruptions, delays, and planned maintenance.</p>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 50px; margin-bottom: 20px;">Technology Stack</h2>
+            <div class="tech-stack">
+                <div class="tech-card">
+                    <h3>Backend Technologies</h3>
+                    <ul>
+                        <li><strong>Python 3.9+</strong> - Core language</li>
+                        <li><strong>FastAPI</strong> - Modern REST API framework</li>
+                        <li><strong>Flask</strong> - Web interface server</li>
+                        <li><strong>NetworkX</strong> - Graph algorithms for routing</li>
+                        <li><strong>Pandas</strong> - Data processing</li>
+                    </ul>
+                </div>
+                <div class="tech-card">
+                    <h3>Data Sources</h3>
+                    <ul>
+                        <li><strong>GTFS Static</strong> - Schedule and route data</li>
+                        <li><strong>GTFS Realtime</strong> - Live vehicle positions</li>
+                        <li><strong>PTV Open Data</strong> - Official PTV feeds</li>
+                        <li><strong>Protobuf</strong> - Efficient data serialization</li>
+                    </ul>
+                </div>
+                <div class="tech-card">
+                    <h3>Frontend & Visualization</h3>
+                    <ul>
+                        <li><strong>Vanilla JavaScript</strong> - No framework overhead</li>
+                        <li><strong>Leaflet.js</strong> - Interactive maps</li>
+                        <li><strong>Responsive CSS</strong> - Mobile-friendly design</li>
+                        <li><strong>OpenStreetMap</strong> - Map tiles</li>
+                    </ul>
+                </div>
+                <div class="tech-card">
+                    <h3>Quality Assurance</h3>
+                    <ul>
+                        <li><strong>pytest</strong> - Testing framework</li>
+                        <li><strong>230+ tests</strong> - Comprehensive coverage</li>
+                        <li><strong>96% coverage</strong> - High quality code</li>
+                        <li><strong>Type hints</strong> - Enhanced reliability</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>Repository:</strong> <a href="https://github.com/caprihan/PTV_Assistant" target="_blank">https://github.com/caprihan/PTV_Assistant</a>
+            </div>
+        </div>
+
+        <!-- GTFS Input APIs Tab -->
+        <div id="input-apis" class="tab-content">
+            <div class="api-section">
+                <h2>GTFS Input APIs (Data Retrieval)</h2>
+                <p>These endpoints retrieve data from GTFS feeds and provide access to transit system status, stops, vehicle positions, and service alerts. All endpoints are read-only GET requests.</p>
+
+                <div class="info-box">
+                    <strong>How to Test APIs Interactively:</strong><br>
+                    1. Scroll to any endpoint in the Swagger UI below<br>
+                    2. Click on the endpoint to expand it<br>
+                    3. Click the <strong>"Try it out"</strong> button<br>
+                    4. Fill in any required parameters<br>
+                    5. Click <strong>"Execute"</strong> to run the request<br>
+                    6. View the response in the "Server response" section<br><br>
+                    <em>If the iframe doesn't work properly, use the "Open in New Tab" button for full Swagger functionality.</em>
+                </div>
+
+                <!-- Health Check -->
+                <div class="api-category">
+                    <h3>Health Check</h3>
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/health</span>
+                        </div>
+                        <div class="api-description">
+                            Check API status and retrieve GTFS data statistics including number of stops, routes, and trips loaded.
+                        </div>
+                        <div class="api-params">
+                            <strong>Response:</strong> API status, version, GTFS loaded flag, stops/routes/trips count, timestamps
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stop Operations -->
+                <div class="api-category">
+                    <h3>Stop Search & Lookup</h3>
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/stops/search</span>
+                        </div>
+                        <div class="api-description">
+                            Search for stops by name with fuzzy matching capabilities. Returns matched stops with similarity scores.
+                        </div>
+                        <div class="api-params">
+                            <strong>Parameters:</strong><br>
+                            • <code>query</code> (string, required) - Search term<br>
+                            • <code>limit</code> (integer, optional) - Max results (1-20, default: 10)<br>
+                            • <code>fuzzy</code> (boolean, optional) - Enable fuzzy matching (default: true)
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/stops/{stop_id}</span>
+                        </div>
+                        <div class="api-description">
+                            Get detailed information for a specific stop by its GTFS stop ID including coordinates and name.
+                        </div>
+                        <div class="api-params">
+                            <strong>Path Parameter:</strong> <code>stop_id</code> - GTFS stop identifier<br>
+                            <strong>Response:</strong> Stop details with name, ID, latitude, longitude
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vehicle Positions -->
+                <div class="api-category">
+                    <h3>Vehicle Positions (Real-Time)</h3>
+                    <div class="warning-box">
+                        <strong>Note:</strong> Vehicle position endpoints require <code>PTV_API_KEY</code> environment variable to be set.
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/vehicles</span>
+                        </div>
+                        <div class="api-description">
+                            Get all vehicle positions for a specific transport mode with real-time location data.
+                        </div>
+                        <div class="api-params">
+                            <strong>Parameter:</strong> <code>mode</code> (query) - metro, vline, tram, or bus<br>
+                            <strong>Response:</strong> List of vehicles with position, trip_id, route_id, speed, occupancy
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/vehicles/summary</span>
+                        </div>
+                        <div class="api-description">
+                            Get summary statistics for vehicles of a specific mode.
+                        </div>
+                        <div class="api-params">
+                            <strong>Parameter:</strong> <code>mode</code> (query) - Transport mode<br>
+                            <strong>Response:</strong> Total vehicles, in_transit count, at_stop count, average_speed
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/vehicles/{vehicle_id}</span>
+                        </div>
+                        <div class="api-description">
+                            Get position and details for a specific vehicle by its ID.
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/vehicles/route/{route_id}</span>
+                        </div>
+                        <div class="api-description">
+                            Get all vehicles currently operating on a specific route.
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/vehicles/near/{stop_id}</span>
+                        </div>
+                        <div class="api-description">
+                            Get vehicles within a specified radius of a stop, sorted by distance.
+                        </div>
+                        <div class="api-params">
+                            <strong>Parameter:</strong> <code>radius_km</code> (query) - Radius in kilometers (0.1-10, default: 1.0)
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/vehicles/trip/{trip_id}</span>
+                        </div>
+                        <div class="api-description">
+                            Get the vehicle currently serving a specific trip.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Alerts -->
+                <div class="api-category">
+                    <h3>Service Alerts</h3>
+                    <div class="warning-box">
+                        <strong>Note:</strong> Service alerts are only available for metro and tram modes. Alert endpoints require <code>PTV_API_KEY</code>.
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/alerts</span>
+                        </div>
+                        <div class="api-description">
+                            Get all service alerts for a specific transport mode.
+                        </div>
+                        <div class="api-params">
+                            <strong>Parameters:</strong><br>
+                            • <code>mode</code> (query) - metro or tram<br>
+                            • <code>active_only</code> (query, boolean) - Filter to active alerts only (default: true)
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/alerts/summary</span>
+                        </div>
+                        <div class="api-description">
+                            Get summary statistics for service alerts including counts by severity and effect.
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/alerts/{alert_id}</span>
+                        </div>
+                        <div class="api-description">
+                            Get detailed information for a specific alert by its ID.
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/alerts/route/{route_id}</span>
+                        </div>
+                        <div class="api-description">
+                            Get all alerts affecting a specific route.
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/alerts/stop/{stop_id}</span>
+                        </div>
+                        <div class="api-description">
+                            Get all alerts affecting a specific stop.
+                        </div>
+                    </div>
+
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-get">GET</span>
+                            <span class="api-path">/api/v1/alerts/severity/{severity}</span>
+                        </div>
+                        <div class="api-description">
+                            Get alerts filtered by severity level.
+                        </div>
+                        <div class="api-params">
+                            <strong>Severity Levels:</strong> INFO, WARNING, SEVERE, UNKNOWN_SEVERITY
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Swagger UI for Input APIs -->
+            <div class="swagger-container">
+                <div class="swagger-header">
+                    <h3>Interactive API Documentation</h3>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        Click on any endpoint below, then click <strong>"Try it out"</strong> to test the API with live data.
+                        You can modify parameters and execute requests directly.
+                    </p>
+                    <div class="swagger-nav">
+                        <button onclick="openSwagger('operations-tag-health')">Health</button>
+                        <button onclick="openSwagger('operations-tag-stops')">Stops</button>
+                        <button onclick="openSwagger('operations-tag-vehicles')">Vehicles</button>
+                        <button onclick="openSwagger('operations-tag-alerts')">Alerts</button>
+                        <a href="http://localhost:8000/docs" target="_blank" style="margin-left: auto;">
+                            <button class="btn-open-tab">Open in New Tab ↗</button>
+                        </a>
+                    </div>
+                </div>
+                <iframe id="swagger-frame-input" src="http://localhost:8000/docs#operations-tag-health" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+            </div>
+        </div>
+
+        <!-- Output APIs Tab -->
+        <div id="output-apis" class="tab-content">
+            <div class="api-section">
+                <h2>Output APIs (Journey Planning)</h2>
+                <p>This endpoint performs complex graph computation to find optimal multi-modal journeys through Melbourne's transit network. It applies the Connection Scan Algorithm (CSA) with optional real-time delay integration.</p>
+
+                <div class="api-category">
+                    <h3>Journey Planning</h3>
+                    <div class="api-card">
+                        <div class="api-header">
+                            <span class="api-method method-post">POST</span>
+                            <span class="api-path">/api/v1/journey/plan</span>
+                        </div>
+                        <div class="api-description">
+                            Plan a multi-modal journey between two stops with optional real-time delay integration. Returns the optimal route with leg-by-leg breakdown, transfer details, and timing information.
+                        </div>
+                        <div class="api-params">
+                            <strong>Request Body (JSON):</strong><br>
+                            • <code>origin</code> (string, required) - Origin stop name or ID<br>
+                            • <code>destination</code> (string, required) - Destination stop name or ID<br>
+                            • <code>departure_time</code> (string, optional) - Departure time in HH:MM:SS format<br>
+                            • <code>include_realtime</code> (boolean, optional) - Include real-time delays (default: false)<br>
+                            • <code>max_transfers</code> (integer, optional) - Maximum number of transfers (0-5, default: 3)
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 40px;">Example Request</h3>
+                <div class="code-example">
+POST /api/v1/journey/plan
+Content-Type: application/json
+
+{
+  <span class="string">"origin"</span>: <span class="string">"Tarneit Station"</span>,
+  <span class="string">"destination"</span>: <span class="string">"Waurn Ponds Station"</span>,
+  <span class="string">"departure_time"</span>: <span class="string">"14:00:00"</span>,
+  <span class="string">"include_realtime"</span>: <span class="keyword">true</span>,
+  <span class="string">"max_transfers"</span>: 3
+}
+                </div>
+
+                <h3>Example Response</h3>
+                <div class="code-example">
+{
+  <span class="string">"success"</span>: <span class="keyword">true</span>,
+  <span class="string">"message"</span>: <span class="string">"Journey found successfully"</span>,
+  <span class="string">"journey"</span>: {
+    <span class="string">"origin_stop_id"</span>: <span class="string">"47648"</span>,
+    <span class="string">"origin_stop_name"</span>: <span class="string">"Tarneit Station"</span>,
+    <span class="string">"destination_stop_id"</span>: <span class="string">"47641"</span>,
+    <span class="string">"destination_stop_name"</span>: <span class="string">"Waurn Ponds Station"</span>,
+    <span class="string">"departure_time"</span>: <span class="string">"14:57:00"</span>,
+    <span class="string">"arrival_time"</span>: <span class="string">"15:48:00"</span>,
+    <span class="string">"duration_minutes"</span>: 51,
+    <span class="string">"num_transfers"</span>: 0,
+    <span class="string">"legs"</span>: [
+      {
+        <span class="string">"from_stop_name"</span>: <span class="string">"Tarneit Station"</span>,
+        <span class="string">"to_stop_name"</span>: <span class="string">"Waurn Ponds Station"</span>,
+        <span class="string">"departure_time"</span>: <span class="string">"14:57:00"</span>,
+        <span class="string">"arrival_time"</span>: <span class="string">"15:48:00"</span>,
+        <span class="string">"route_name"</span>: <span class="string">"Geelong"</span>,
+        <span class="string">"mode"</span>: <span class="string">"rail"</span>,
+        <span class="string">"num_stops"</span>: 10,
+        <span class="string">"delay_seconds"</span>: 0,
+        <span class="string">"is_cancelled"</span>: <span class="keyword">false</span>
+      }
+    ],
+    <span class="string">"modes_used"</span>: [<span class="string">"rail"</span>],
+    <span class="string">"is_multi_modal"</span>: <span class="keyword">false</span>
+  }
+}
+                </div>
+
+                <h3 style="margin-top: 40px;">Response Fields</h3>
+                <div class="setup-section">
+                    <h3>Journey Object</h3>
+                    <ul>
+                        <li><code>origin_stop_id</code>, <code>origin_stop_name</code> - Starting point details with coordinates</li>
+                        <li><code>destination_stop_id</code>, <code>destination_stop_name</code> - Ending point details with coordinates</li>
+                        <li><code>departure_time</code>, <code>arrival_time</code> - Journey timing in HH:MM:SS format</li>
+                        <li><code>duration_minutes</code> - Total journey duration</li>
+                        <li><code>num_transfers</code> - Number of transfers required</li>
+                        <li><code>legs</code> - Array of journey segments (each leg represents a trip or transfer)</li>
+                        <li><code>modes_used</code> - List of transport modes (rail, tram, bus, ferry)</li>
+                        <li><code>is_multi_modal</code> - Whether journey uses multiple transport types</li>
+                    </ul>
+                </div>
+
+                <div class="setup-section">
+                    <h3>Leg Object (Journey Segment)</h3>
+                    <ul>
+                        <li><code>from_stop_name</code>, <code>to_stop_name</code> - Segment start and end stops</li>
+                        <li><code>departure_time</code>, <code>arrival_time</code> - Segment timing</li>
+                        <li><code>trip_id</code>, <code>route_id</code>, <code>route_name</code> - Service identifiers</li>
+                        <li><code>mode</code> - Transport mode (rail, bus, tram, ferry, transfer)</li>
+                        <li><code>num_stops</code> - Number of stops in this segment</li>
+                        <li><code>intermediate_stops</code> - List of stops between start and end</li>
+                        <li><code>delay_seconds</code> - Real-time delay (if <code>include_realtime=true</code>)</li>
+                        <li><code>is_cancelled</code> - Service cancellation status</li>
+                        <li><code>platform_info</code> - Departure/arrival platform details</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <strong>Algorithm:</strong> The journey planner uses the Connection Scan Algorithm (CSA), an efficient method for computing earliest-arrival journeys in public transit networks. It scans through all connections in chronological order to find the optimal route.
+                </div>
+            </div>
+
+            <!-- Swagger UI for Journey Planning -->
+            <div class="swagger-container">
+                <div class="swagger-header">
+                    <h3>Interactive API Documentation</h3>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        Click <strong>"Try it out"</strong> on the journey planning endpoint to test with your own origin/destination.
+                        You can execute the request and see the response directly.
+                    </p>
+                    <div class="swagger-nav">
+                        <button onclick="openSwagger('operations-tag-journey')">Journey Planning</button>
+                        <a href="http://localhost:8000/docs#operations-tag-journey" target="_blank" style="margin-left: auto;">
+                            <button class="btn-open-tab">Open in New Tab ↗</button>
+                        </a>
+                    </div>
+                </div>
+                <iframe id="swagger-frame-output" src="http://localhost:8000/docs#operations-tag-journey" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+            </div>
+        </div>
+
+        <!-- Setup Guide Tab -->
+        <div id="setup" class="tab-content">
+            <h2>Setup & Configuration Guide</h2>
+
+            <div class="setup-section">
+                <h3>Prerequisites</h3>
+                <ul>
+                    <li><strong>Python 3.9 or higher</strong> - Required for all backend components</li>
+                    <li><strong>GTFS Data</strong> - Download from <a href="https://opendata.transport.vic.gov.au/" target="_blank">PTV Open Data Portal</a></li>
+                    <li><strong>PTV API Key</strong> - Required for real-time features (vehicles, alerts)</li>
+                    <li><strong>Git</strong> - For cloning the repository</li>
+                </ul>
+            </div>
+
+            <div class="setup-section">
+                <h3>Installation Steps</h3>
+                <ol>
+                    <li><strong>Clone the Repository</strong></li>
+                </ol>
+                <div class="code-example">
+git clone https://github.com/caprihan/PTV_Assistant.git
+cd PTV_Assistant
+                </div>
+
+                <ol start="2">
+                    <li><strong>Create Virtual Environment</strong></li>
+                </ol>
+                <div class="code-example">
+python -m venv venv
+<span class="comment"># On Windows:</span>
+venv\Scripts\activate
+<span class="comment"># On macOS/Linux:</span>
+source venv/bin/activate
+                </div>
+
+                <ol start="3">
+                    <li><strong>Install Dependencies</strong></li>
+                </ol>
+                <div class="code-example">
+pip install -r requirements.txt
+                </div>
+
+                <ol start="4">
+                    <li><strong>Download GTFS Data</strong></li>
+                </ol>
+                <p>Place GTFS files in <code>data/gtfs/</code> directory. Required files:</p>
+                <ul>
+                    <li>stops.txt</li>
+                    <li>routes.txt</li>
+                    <li>trips.txt</li>
+                    <li>stop_times.txt</li>
+                    <li>calendar.txt</li>
+                    <li>calendar_dates.txt (optional)</li>
+                    <li>transfers.txt (optional)</li>
+                </ul>
+            </div>
+
+            <div class="setup-section">
+                <h3>Environment Configuration</h3>
+                <p>Create a <code>.env</code> file in the project root:</p>
+                <div class="code-example">
+<span class="comment"># Required for real-time features (vehicles, alerts)</span>
+PTV_API_KEY=your_api_key_here
+
+<span class="comment"># Optional: Custom ports</span>
+FASTAPI_URL=http://localhost:8000
+FLASK_PORT=5001
+
+<span class="comment"># Optional: Specify which GTFS modes to load</span>
+<span class="comment"># 1=V/Line, 2=Metro, 3=Trams, 4-6=Buses, 10=Night Bus, 11=SkyBus</span>
+GTFS_MODES_TO_LOAD=1,2,3
+                </div>
+
+                <div class="warning-box">
+                    <strong>Getting Your PTV API Key:</strong><br>
+                    1. Visit <a href="https://opendata.transport.vic.gov.au/" target="_blank">PTV Open Data Portal</a><br>
+                    2. Register for a free developer account<br>
+                    3. Generate an API key from your dashboard<br>
+                    4. Add it to your <code>.env</code> file<br><br>
+                    <strong>Note:</strong> Without an API key, real-time features (vehicle positions and service alerts) will not be available. Journey planning using static GTFS data will still work.
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <h3>Running the Application</h3>
+
+                <p><strong>✨ Simple One-Command Startup (Recommended)</strong></p>
+                <div class="code-example">
+<span class="comment"># This starts BOTH Flask and FastAPI automatically!</span>
+python app.py
+
+<span class="comment"># The FastAPI backend starts automatically in the background</span>
+<span class="comment"># Access web interface at: http://localhost:5001</span>
+<span class="comment"># Access Swagger UI at: http://localhost:8000/docs</span>
+<span class="comment"># Press CTRL+C to stop both servers</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>New in this version:</strong> Running <code>python app.py</code> now automatically starts the FastAPI backend server, so you don't need to run two separate commands anymore!
+                </div>
+
+                <p><strong>Alternative: FastAPI Backend Only (API Development)</strong></p>
+                <div class="code-example">
+<span class="comment"># If you only need the API (no web interface)</span>
+python -m uvicorn src.api.main:app --reload --port 8000
+
+<span class="comment"># Access API documentation at:</span>
+<span class="comment"># http://localhost:8000/docs (Swagger UI)</span>
+<span class="comment"># http://localhost:8000/redoc (ReDoc)</span>
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <h3>Quick Start Examples</h3>
+                <p><strong>Example 1: Search for a Stop</strong></p>
+                <div class="code-example">
+curl "http://localhost:8000/api/v1/stops/search?query=Tarneit&limit=5"
+                </div>
+
+                <p><strong>Example 2: Plan a Journey</strong></p>
+                <div class="code-example">
+curl -X POST "http://localhost:8000/api/v1/journey/plan" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "origin": "Tarneit Station",
+    "destination": "Waurn Ponds Station",
+    "departure_time": "14:00:00",
+    "max_transfers": 3
+  }'
+                </div>
+
+                <p><strong>Example 3: Get Live Vehicle Positions (requires API key)</strong></p>
+                <div class="code-example">
+curl "http://localhost:8000/api/v1/vehicles?mode=metro"
+                </div>
+
+                <p><strong>Example 4: Check Service Alerts (requires API key)</strong></p>
+                <div class="code-example">
+curl "http://localhost:8000/api/v1/alerts?mode=metro&active_only=true"
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <h3>Testing</h3>
+                <div class="code-example">
+<span class="comment"># Run all tests</span>
+pytest
+
+<span class="comment"># Run with coverage report</span>
+pytest --cov=src --cov-report=term-missing
+
+<span class="comment"># Run specific test module</span>
+pytest tests/test_data/test_gtfs_parser.py -v
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <h3>GTFS Data Auto-Update System</h3>
+                <p>The application includes an automatic GTFS data update system that keeps schedule information current by downloading the latest datasets from PTV.</p>
+
+                <h4>Configuration (Environment Variables)</h4>
+                <p>Add these variables to your <code>.env</code> file to enable automatic updates:</p>
+                <div class="code-example">
+<span class="comment"># Enable automatic GTFS updates</span>
+GTFS_AUTO_UPDATE=true
+
+<span class="comment"># Update interval: 'daily' or 'weekly'</span>
+GTFS_UPDATE_INTERVAL=daily
+
+<span class="comment"># Hour of day for daily updates (0-23, default: 3 AM)</span>
+GTFS_UPDATE_HOUR=3
+
+<span class="comment"># Day of week for weekly updates (monday, tuesday, etc.)</span>
+GTFS_UPDATE_DAY=sunday
+
+<span class="comment"># Rate limit delay between downloads (seconds, default: 3.0)</span>
+<span class="comment"># PTV API allows max 20 calls/minute = 1 call per 3 seconds</span>
+GTFS_RATE_LIMIT_DELAY=3.0
+
+<span class="comment"># Retry configuration</span>
+GTFS_MAX_RETRIES=3
+GTFS_RETRY_DELAY=60
+
+<span class="comment"># Optional: Admin API key for manual triggers</span>
+ADMIN_API_KEY=your-secure-admin-key-here
+                </div>
+
+                <h4>Manual Update via CLI</h4>
+                <p>Trigger GTFS updates manually using the command-line tool:</p>
+                <div class="code-example">
+<span class="comment"># Update all configured modes</span>
+python scripts/gtfs_update.py --update-all
+
+<span class="comment"># Update specific modes only</span>
+python scripts/gtfs_update.py --modes 1,2,3
+
+<span class="comment"># Check update status</span>
+python scripts/gtfs_update.py --status
+
+<span class="comment"># View update history</span>
+python scripts/gtfs_update.py --history --limit 20
+                </div>
+
+                <h4>Manual Update via API</h4>
+                <p>Trigger updates programmatically using the admin API endpoints (requires <code>ADMIN_API_KEY</code>):</p>
+                <div class="code-example">
+<span class="comment"># Trigger manual update</span>
+curl -X POST "http://localhost:8000/api/v1/admin/gtfs/update" \
+  -H "Authorization: Bearer your-admin-key" \
+  -H "Content-Type: application/json" \
+  -d '{"modes": ["1", "2", "3"]}'
+
+<span class="comment"># Check update status</span>
+curl "http://localhost:8000/api/v1/admin/gtfs/status" \
+  -H "Authorization: Bearer your-admin-key"
+
+<span class="comment"># View update history</span>
+curl "http://localhost:8000/api/v1/admin/gtfs/history?limit=10" \
+  -H "Authorization: Bearer your-admin-key"
+
+<span class="comment"># Reload services without downloading</span>
+curl -X POST "http://localhost:8000/api/v1/admin/reload" \
+  -H "Authorization: Bearer your-admin-key"
+                </div>
+
+                <h4>How It Works</h4>
+                <ul>
+                    <li><strong>Automatic Downloads:</strong> Scheduler downloads latest GTFS datasets from PTV at configured intervals</li>
+                    <li><strong>Rate Limiting:</strong> Respects PTV's 20 calls/minute limit with configurable delays between downloads</li>
+                    <li><strong>Validation:</strong> Validates ZIP files and checks for required GTFS files before extraction</li>
+                    <li><strong>Atomic Updates:</strong> Uses temporary directories and atomic moves to prevent data corruption</li>
+                    <li><strong>Rollback:</strong> Automatically restores previous data if update fails</li>
+                    <li><strong>Hot Reload:</strong> Reloads all parsers and planners without restarting servers</li>
+                    <li><strong>Retry Logic:</strong> Automatically retries failed downloads with exponential backoff</li>
+                    <li><strong>History Tracking:</strong> Logs all update attempts with timestamps and results</li>
+                </ul>
+
+                <h4>Data Sources</h4>
+                <p>GTFS static datasets are downloaded from PTV Open Data Portal:</p>
+                <ul>
+                    <li><strong>Mode 1 (V/Line):</strong> Regional trains</li>
+                    <li><strong>Mode 2 (Metro):</strong> Metropolitan trains</li>
+                    <li><strong>Mode 3 (Trams):</strong> Melbourne tram network</li>
+                    <li><strong>Modes 4-6 (Buses):</strong> Metropolitan and regional buses</li>
+                    <li><strong>Mode 11 (SkyBus):</strong> Airport express</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>Important:</strong> Auto-updates run in the background and do not interrupt journey planning.
+                    Services are only reloaded after successful downloads and validation. If you disable auto-updates,
+                    you can still trigger manual updates via CLI or API.
+                </div>
+
+                <div class="warning-box">
+                    <strong>Rate Limiting:</strong> PTV's GTFS APIs have a rate limit of 20 calls per minute.
+                    The system automatically enforces a 3-second delay between mode downloads to stay within limits.
+                    Do not decrease <code>GTFS_RATE_LIMIT_DELAY</code> below 3.0 seconds to avoid API throttling.
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>Project Status:</strong><br>
+                • Phase 0: ✅ Foundation Complete (21 tests, 100% coverage)<br>
+                • Phase 1: ✅ Data Layer Complete (62 tests, 97% coverage)<br>
+                • Phase 2: ✅ Graph Construction Complete<br>
+                • Total: 230+ tests, 96% overall coverage
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="https://github.com/caprihan/PTV_Assistant" target="_blank" class="link-button">View on GitHub</a>
+                <a href="http://localhost:8000/docs" target="_blank" class="link-button secondary">API Documentation</a>
+                <a href="/" class="link-button secondary">Try Journey Planner</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if FastAPI backend is running
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/health', {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                if (response.ok) {
+                    console.log('FastAPI backend is running');
+                    return true;
+                }
+            } catch (error) {
+                console.error('FastAPI backend not accessible:', error);
+                showBackendWarning();
+                return false;
+            }
+        }
+
+        function showBackendWarning() {
+            const warning = document.createElement('div');
+            warning.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: #fff3cd;
+                border-left: 4px solid #ffc107;
+                padding: 15px 20px;
+                border-radius: 5px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                max-width: 400px;
+            `;
+            warning.innerHTML = `
+                <strong style="color: #f57c00;">⚠ FastAPI Backend Not Running</strong><br>
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">
+                    The interactive Swagger UI requires the FastAPI backend to be running.<br><br>
+                    <strong>The backend should start automatically with app.py</strong><br>
+                    If it didn't start, you can start it manually:<br>
+                    <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 3px; display: block; margin-top: 5px;">
+                    python -m uvicorn src.api.main:app --reload --port 8000
+                    </code>
+                </p>
+                <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Dismiss
+                </button>
+            `;
+            document.body.appendChild(warning);
+        }
+
+        // Check backend on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkBackendStatus();
+        });
+
+        function switchTab(tabName, event) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Mark tab as active
+            event.target.classList.add('active');
+        }
+
+        function openSwagger(tag) {
+            // Determine which tab is active
+            const activeTab = document.querySelector('.tab-content.active');
+
+            // Update the appropriate iframe
+            if (activeTab && activeTab.id === 'input-apis') {
+                const frame = document.getElementById('swagger-frame-input');
+                if (frame) {
+                    frame.src = 'http://localhost:8000/docs#' + tag;
+                }
+            } else if (activeTab && activeTab.id === 'output-apis') {
+                const frame = document.getElementById('swagger-frame-output');
+                if (frame) {
+                    frame.src = 'http://localhost:8000/docs#' + tag;
+                }
+            }
+        }
+
+        // Smooth scroll for internal links
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a[href^="#"]');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

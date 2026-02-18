@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTV Journey Planner - Multi-Modal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        /* Route Card Styles */
+        .routes-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .routes-header h3 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .routes-header p {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+
+        .route-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .route-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .route-card.expanded {
+            border-color: #667eea;
+        }
+
+        .route-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .route-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+
+        .route-badge.fastest {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .route-badge.direct {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .route-time-summary {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .route-duration-badge {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .route-summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .route-modes {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .route-info {
+            flex: 1;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .route-details-toggle {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .route-details-toggle:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .route-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .route-details.expanded {
+            max-height: 2000px;
+            margin-top: 20px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .transfer-leg {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .transfer-leg strong {
+            color: #856404;
+        }
+
+        .transfer-info {
+            font-size: 13px;
+            color: #856404;
+            margin-top: 5px;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .no-route {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .no-route-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .no-route-hint {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .no-route-hint h4 {
+            color: #856404;
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .no-route-hint p {
+            color: #856404;
+            margin: 8px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .no-route-hint .try-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #ffc107;
+            color: #000;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .no-route-hint .try-link:hover {
+            background: #ffb300;
+        }
+
+        .journey-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .journey-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .journey-time {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .journey-duration {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .leg {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .leg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .leg-route {
+            font-weight: 600;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        .leg-stops {
+            display: flex;
+            align-items: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .leg-time {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .intermediate-stops {
+            margin-top: 10px;
+            padding-left: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .intermediate-stops summary {
+            cursor: pointer;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .intermediate-stops ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .stations-link {
+            margin-top: 30px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .stations-link a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+
+        .stations-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            background: #fee;
+            border: 2px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* Autocomplete Styles */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .autocomplete-suggestions.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: #f8f9fa;
+        }
+
+        .autocomplete-item.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .autocomplete-item strong {
+            color: #667eea;
+        }
+
+        .autocomplete-item.selected strong {
+            color: white;
+        }
+
+        .autocomplete-loading {
+            padding: 12px 15px;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                border-bottom: 1px solid #e0e0e0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>🚆 PTV Journey Planner - Multi-Modal</h1>
+            <div class="nav-links">
+                <a href="/" class="active">Journey Planner</a>
+                <a href="/map">Plan on Map</a>
+                <a href="/live">Live Vehicles</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/stations">Stations</a>
+                <a href="/about">About</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h2>Plan Your Journey</h2>
+            <p>Find routes across trains, trams, and buses in one search</p>
+        </div>
+
+        <div class="form-section">
+            <form id="journeyForm">
+                <div class="form-group autocomplete-container">
+                    <label for="origin">From (Starting Station)</label>
+                    <input type="text" id="origin" name="origin" placeholder="Start typing station name..."
+                           autocomplete="off" required>
+                    <div id="origin-suggestions" class="autocomplete-suggestions"></div>
+                </div>
+
+                <div class="form-group autocomplete-container">
+                    <label for="destination">To (Destination Station)</label>
+                    <input type="text" id="destination" name="destination" placeholder="Start typing station name..."
+                           autocomplete="off" required>
+                    <div id="destination-suggestions" class="autocomplete-suggestions"></div>
+                </div>
+
+                <button type="submit" class="btn" id="planBtn">Find Best Route</button>
+            </form>
+
+            <div id="loading" class="loading" style="display: none;">
+                🔍 Searching all transport modes...
+            </div>
+
+            <div id="result" class="result-section">
+                <div class="routes-header">
+                    <h3 id="routes-title">Available Routes</h3>
+                    <p id="routes-subtitle">Choose the route that works best for you</p>
+                </div>
+
+                <div id="routes-container">
+                    <!-- Route cards will be shown here -->
+                </div>
+            </div>
+
+            <div id="error" style="display: none;" class="error">
+                <!-- Error messages will be shown here -->
+            </div>
+
+            <div class="stations-link">
+                <a href="/stations">View All Stations</a> |
+                <a href="/map">Plan on Map</a> |
+                <a href="/live">Live Vehicles</a> |
+                <a href="/dashboard">Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variable to store current journey data
+        let currentJourneyData = null;
+
+        // Route card expansion
+        function toggleRouteDetails(index) {
+            const card = document.getElementById(`route-${index}`);
+            const details = document.getElementById(`details-${index}`);
+            const toggle = document.getElementById(`toggle-${index}`);
+
+            if (details.classList.contains('expanded')) {
+                details.classList.remove('expanded');
+                card.classList.remove('expanded');
+                toggle.textContent = 'View Details ▼';
+            } else {
+                details.classList.add('expanded');
+                card.classList.add('expanded');
+                toggle.textContent = 'Hide Details ▲';
+            }
+        }
+
+        // Form submission
+        document.getElementById('journeyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = {
+                origin: formData.get('origin'),
+                destination: formData.get('destination')
+                // No time needed - uses current time
+            };
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('planBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to plan journey');
+                }
+
+                displayResults(result);
+
+            } catch (error) {
+                document.getElementById('error').innerHTML = `<strong>Error:</strong> ${error.message}`;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('planBtn').disabled = false;
+            }
+        });
+
+        function displayResults(result) {
+            const journey = result.journey;
+
+            // Store journey data globally for "View on Map" functionality
+            currentJourneyData = result;
+
+            // No route found
+            if (!journey) {
+                document.getElementById('routes-container').innerHTML = `
+                    <div class="no-route">
+                        <div class="no-route-icon">❌</div>
+                        <div>No Route Found</div>
+                        <p style="font-size: 14px; margin-top: 10px; color: #999;">
+                            No routes available from ${result.origin.name} to ${result.destination.name}
+                        </p>
+                        <div class="no-route-hint">
+                            <h4>💡 Suggestions</h4>
+                            <p>• Check station names are spelled correctly</p>
+                            <p>• Try alternative nearby stations</p>
+                            <p>• These stations may not be connected by public transport</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('result').style.display = 'block';
+                return;
+            }
+
+            // Update header
+            document.getElementById('routes-title').textContent =
+                `Best Route: ${result.origin.name} → ${result.destination.name}`;
+
+            const transferText = journey.num_transfers === 0 ? 'Direct route' :
+                               journey.num_transfers === 1 ? '1 transfer' :
+                               `${journey.num_transfers} transfers`;
+            document.getElementById('routes-subtitle').textContent = transferText;
+
+            // Display single journey (always expanded)
+            const html = createSingleJourney(journey, 0);
+
+            document.getElementById('routes-container').innerHTML = html;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function getModeIcon(mode) {
+            const icons = {
+                'Train': '🚆',
+                'Metro Train': '🚇',
+                'V/Line': '🚆',
+                'Tram': '🚊',
+                'Bus': '🚌',
+                'Transfer': '🚶'
+            };
+            return icons[mode] || '🚉';
+        }
+
+        function formatModesUsed(modesUsed) {
+            return modesUsed.map(mode => getModeIcon(mode)).join(' → ');
+        }
+
+        function createSingleJourney(journey, index) {
+            const modesIcons = formatModesUsed(journey.modes_used);
+
+            let html = `
+                <div class="journey-card">
+                    <div class="journey-header">
+                        <div>
+                            <div class="journey-time">${journey.departure_time} → ${journey.arrival_time}</div>
+                            <div style="color: #666; margin-top: 5px;">
+                                ${journey.modes_used.join(', ')}
+                            </div>
+                        </div>
+                        <div class="journey-duration">${journey.duration_minutes} min</div>
+                    </div>
+            `;
+
+            // Add legs (always visible)
+            journey.legs.forEach((leg, legIndex) => {
+                if (leg.is_transfer) {
+                    html += `
+                        <div class="transfer-leg">
+                            <strong>🚶 ${leg.route_name || 'Transfer'}</strong>
+                            <div class="transfer-info">
+                                ${leg.from_stop} → ${leg.to_stop}
+                                <span style="margin-left: 10px;">${leg.duration_minutes} min walk</span>
+                            </div>
+                            ${leg.transfer_hub_name ? `<div class="transfer-info">Transfer at: ${leg.transfer_hub_name}</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="leg">
+                            <div class="leg-header">
+                                <div class="leg-route">${getModeIcon(leg.mode)} ${leg.route_name}</div>
+                                <div class="leg-time">${leg.departure_time} - ${leg.arrival_time}</div>
+                            </div>
+                            <div class="leg-stops">
+                                ${leg.from_stop} → ${leg.to_stop}
+                                <span style="margin-left: 15px; color: #999;">
+                                    ${leg.num_stops} stops · ${leg.duration_minutes} min
+                                </span>
+                            </div>
+                    `;
+
+                    // Add intermediate stops if available
+                    if (leg.intermediate_stops && leg.intermediate_stops.length > 0) {
+                        html += `
+                            <details class="intermediate-stops">
+                                <summary>View ${leg.intermediate_stops.length} intermediate stops</summary>
+                                <ul>
+                                    ${leg.intermediate_stops.map(stop => `<li>${stop}</li>`).join('')}
+                                </ul>
+                            </details>
+                        `;
+                    }
+
+                    html += `</div>`;
+                }
+            });
+
+            // Add "View on Map" button
+            html += `
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                    <button class="btn" onclick="viewJourneyOnMap(${index})"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                   padding: 12px 24px; width: 100%; font-size: 14px;">
+                        📍 View on Map
+                    </button>
+                </div>
+            `;
+
+            html += `</div>`;
+            return html;
+        }
+
+        function createRouteCard(journey, index, badgeClass, badgeText) {
+            const modesIcons = formatModesUsed(journey.modes_used);
+            const transferText = journey.num_transfers === 0 ? 'Direct route' :
+                               journey.num_transfers === 1 ? '1 transfer' :
+                               `${journey.num_transfers} transfers`;
+
+            let html = `
+                <div class="route-card" id="route-${index}">
+                    <div class="route-card-header">
+                        <div style="flex: 1;">
+                            ${badgeText ? `<span class="route-badge ${badgeClass}">${badgeText}</span>` : ''}
+                            <span class="route-time-summary">${journey.departure_time} → ${journey.arrival_time}</span>
+                        </div>
+                        <div class="route-duration-badge">${journey.duration_minutes} min</div>
+                    </div>
+
+                    <div class="route-summary">
+                        <div class="route-modes">${modesIcons}</div>
+                        <div class="route-info">
+                            <div style="font-weight: 600; color: #2c3e50;">${transferText}</div>
+                            <div style="margin-top: 3px;">${journey.modes_used.join(', ')}</div>
+                        </div>
+                    </div>
+
+                    <button class="route-details-toggle" id="toggle-${index}" onclick="toggleRouteDetails(${index})">
+                        View Details ▼
+                    </button>
+
+                    <div class="route-details" id="details-${index}">
+            `;
+
+            // Add legs
+            journey.legs.forEach((leg, legIndex) => {
+                if (leg.is_transfer) {
+                    html += `
+                        <div class="transfer-leg">
+                            <strong>🚶 ${leg.route_name}</strong>
+                            <div class="transfer-info">
+                                ${leg.from_stop} → ${leg.to_stop}
+                                <span style="margin-left: 10px;">${leg.duration_minutes} min walk</span>
+                            </div>
+                            ${leg.transfer_hub_name ? `<div class="transfer-info">Transfer at: ${leg.transfer_hub_name}</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="leg">
+                            <div class="leg-header">
+                                <div class="leg-route">${getModeIcon(leg.mode)} ${leg.route_name}</div>
+                                <div class="leg-time">${leg.departure_time} - ${leg.arrival_time}</div>
+                            </div>
+                            <div class="leg-stops">
+                                ${leg.from_stop} → ${leg.to_stop}
+                                <span style="margin-left: 15px; color: #999;">
+                                    ${leg.num_stops} stops · ${leg.duration_minutes} min
+                                </span>
+                            </div>
+                    `;
+
+                    // Add intermediate stops if available
+                    if (leg.intermediate_stops && leg.intermediate_stops.length > 0) {
+                        html += `
+                            <details class="intermediate-stops">
+                                <summary>View ${leg.intermediate_stops.length} intermediate stops</summary>
+                                <ul>
+                                    ${leg.intermediate_stops.map(stop => `<li>${stop}</li>`).join('')}
+                                </ul>
+                            </details>
+                        `;
+                    }
+
+                    html += `</div>`;
+                }
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        // Autocomplete functionality
+        class StationAutocomplete {
+            constructor(inputId, suggestionsId) {
+                this.input = document.getElementById(inputId);
+                this.suggestions = document.getElementById(suggestionsId);
+                this.selectedIndex = -1;
+                this.currentSuggestions = [];
+                this.debounceTimer = null;
+
+                this.init();
+            }
+
+            init() {
+                // Input event - fetch suggestions
+                this.input.addEventListener('input', (e) => {
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = setTimeout(() => {
+                        this.fetchSuggestions(e.target.value);
+                    }, 300); // Wait 300ms after user stops typing
+                });
+
+                // Keyboard navigation
+                this.input.addEventListener('keydown', (e) => {
+                    if (this.suggestions.classList.contains('active')) {
+                        if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            this.selectNext();
+                        } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            this.selectPrevious();
+                        } else if (e.key === 'Enter' && this.selectedIndex >= 0) {
+                            e.preventDefault();
+                            this.selectSuggestion(this.currentSuggestions[this.selectedIndex]);
+                        } else if (e.key === 'Escape') {
+                            this.hideSuggestions();
+                        }
+                    }
+                });
+
+                // Click outside to close
+                document.addEventListener('click', (e) => {
+                    if (!this.input.contains(e.target) && !this.suggestions.contains(e.target)) {
+                        this.hideSuggestions();
+                    }
+                });
+            }
+
+            async fetchSuggestions(query) {
+                if (!query || query.length < 2) {
+                    this.hideSuggestions();
+                    return;
+                }
+
+                try {
+                    this.showLoading();
+
+                    const response = await fetch(`/api/stations/autocomplete?q=${encodeURIComponent(query)}&limit=8`);
+                    const suggestions = await response.json();
+
+                    this.currentSuggestions = suggestions;
+                    this.displaySuggestions(suggestions, query);
+                } catch (error) {
+                    console.error('Autocomplete error:', error);
+                    this.hideSuggestions();
+                }
+            }
+
+            displaySuggestions(suggestions, query) {
+                if (suggestions.length === 0) {
+                    this.hideSuggestions();
+                    return;
+                }
+
+                this.selectedIndex = -1;
+
+                // Build HTML
+                const html = suggestions.map((station, index) => {
+                    // Highlight matching text
+                    const name = station.name;
+                    const regex = new RegExp(`(${query})`, 'gi');
+                    const highlighted = name.replace(regex, '<strong>$1</strong>');
+
+                    return `
+                        <div class="autocomplete-item" data-index="${index}">
+                            ${highlighted}
+                        </div>
+                    `;
+                }).join('');
+
+                this.suggestions.innerHTML = html;
+                this.suggestions.classList.add('active');
+
+                // Add click handlers
+                this.suggestions.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const index = parseInt(item.getAttribute('data-index'));
+                        this.selectSuggestion(this.currentSuggestions[index]);
+                    });
+                });
+            }
+
+            showLoading() {
+                this.suggestions.innerHTML = '<div class="autocomplete-loading">Searching stations...</div>';
+                this.suggestions.classList.add('active');
+            }
+
+            hideSuggestions() {
+                this.suggestions.classList.remove('active');
+                this.suggestions.innerHTML = '';
+                this.selectedIndex = -1;
+            }
+
+            selectNext() {
+                const items = this.suggestions.querySelectorAll('.autocomplete-item');
+                if (items.length === 0) return;
+
+                if (this.selectedIndex < items.length - 1) {
+                    this.selectedIndex++;
+                    this.updateSelection(items);
+                }
+            }
+
+            selectPrevious() {
+                const items = this.suggestions.querySelectorAll('.autocomplete-item');
+                if (items.length === 0) return;
+
+                if (this.selectedIndex > 0) {
+                    this.selectedIndex--;
+                    this.updateSelection(items);
+                }
+            }
+
+            updateSelection(items) {
+                items.forEach((item, index) => {
+                    if (index === this.selectedIndex) {
+                        item.classList.add('selected');
+                        item.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            }
+
+            selectSuggestion(station) {
+                this.input.value = station.name;
+                this.hideSuggestions();
+                this.input.blur();
+            }
+        }
+
+        // Initialize autocomplete for both input fields
+        const originAutocomplete = new StationAutocomplete('origin', 'origin-suggestions');
+        const destinationAutocomplete = new StationAutocomplete('destination', 'destination-suggestions');
+
+        /**
+         * Store journey data and open map in new tab
+         */
+        function viewJourneyOnMap(journeyIndex) {
+            // Get the journey data from global storage
+            if (!currentJourneyData || !currentJourneyData.journey) {
+                alert('Journey data not found');
+                return;
+            }
+
+            // Store journey in sessionStorage for map page to access
+            sessionStorage.setItem('selectedJourney', JSON.stringify(currentJourneyData));
+
+            // Open map in new tab
+            window.open('/map', '_blank');
+        }
+    </script>
+</body>
+</html>

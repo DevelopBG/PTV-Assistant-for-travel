@@ -1,0 +1,137 @@
+{
+  "destination": {
+    "id": "10922",
+    "lat": -37.80997342,
+    "lon": 144.96251307,
+    "name": "Melbourne Central Station"
+  },
+  "has_realtime": true,
+  "journey": {
+    "arrival_time": "19:16",
+    "departure_time": "18:29",
+    "destination": {
+      "id": "10922",
+      "lat": -37.80997342,
+      "lon": 144.96251307,
+      "name": "Melbourne Central Station"
+    },
+    "duration_minutes": 47,
+    "legs": [
+      {
+        "arrival_time": "19:00",
+        "departure_time": "18:29",
+        "duration_minutes": 31,
+        "from_coords": {
+          "lat": -37.83216813,
+          "lon": 144.69471438
+        },
+        "from_stop": "Tarneit Station",
+        "intermediate_coords": [
+          {
+            "id": "19982",
+            "lat": -37.77726729,
+            "lon": 144.77083121,
+            "name": "Deer Park Station"
+          },
+          {
+            "id": "22241",
+            "lat": -37.78833946,
+            "lon": 144.83246381,
+            "name": "Sunshine Station"
+          },
+          {
+            "id": "22240",
+            "lat": -37.80157779,
+            "lon": 144.90214034,
+            "name": "Footscray Station"
+          }
+        ],
+        "intermediate_stops": [
+          "Deer Park Station",
+          "Sunshine Station",
+          "Footscray Station"
+        ],
+        "is_transfer": false,
+        "mode": "Regional Train",
+        "num_stops": 5,
+        "route_name": "Geelong - Melbourne Via Geelong",
+        "to_coords": {
+          "lat": -37.81815683,
+          "lon": 144.95216625
+        },
+        "to_stop": "Southern Cross Station"
+      },
+      {
+        "arrival_time": "00:03",
+        "departure_time": "00:00",
+        "duration_minutes": 3,
+        "from_coords": {
+          "lat": -37.81815683,
+          "lon": 144.95216625
+        },
+        "from_stop": "Southern Cross Station",
+        "intermediate_coords": [],
+        "intermediate_stops": [],
+        "is_transfer": true,
+        "mode": "Walking",
+        "num_stops": 2,
+        "route_name": "Transfer",
+        "to_coords": {
+          "lat": -37.81825315,
+          "lon": 144.95200455
+        },
+        "to_platform": "9",
+        "to_stop": "Southern Cross Station",
+        "transfer_hub_name": "southern cross"
+      },
+      {
+        "arrival_time": "19:16",
+        "departure_time": "19:12",
+        "duration_minutes": 4,
+        "from_coords": {
+          "lat": -37.81825315,
+          "lon": 144.95200455
+        },
+        "from_stop": "Southern Cross Station",
+        "intermediate_coords": [
+          {
+            "id": "10920",
+            "lat": -37.81205297,
+            "lon": 144.95562907,
+            "name": "Flagstaff Station"
+          }
+        ],
+        "intermediate_stops": [
+          "Flagstaff Station"
+        ],
+        "is_transfer": false,
+        "mode": "Unknown",
+        "num_stops": 3,
+        "route_name": "Mernda - City",
+        "to_coords": {
+          "lat": -37.80997342,
+          "lon": 144.96251307
+        },
+        "to_stop": "Melbourne Central Station"
+      }
+    ],
+    "modes_used": [
+      "Regional Train",
+      "Unknown"
+    ],
+    "num_transfers": 2,
+    "origin": {
+      "id": "47648",
+      "lat": -37.83216813,
+      "lon": 144.69471438,
+      "name": "Tarneit Station"
+    }
+  },
+  "origin": {
+    "id": "47648",
+    "lat": -37.83216813,
+    "lon": 144.69471438,
+    "name": "Tarneit Station"
+  },
+  "success": true
+}

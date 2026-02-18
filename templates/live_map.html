@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Vehicles - PTV Journey Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .map-container {
+            position: relative;
+            height: calc(100vh - 60px);
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .controls-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            min-width: 280px;
+        }
+
+        .controls-panel h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .mode-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .mode-filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .mode-filter.inactive {
+            opacity: 0.4;
+        }
+
+        .mode-filter input {
+            cursor: pointer;
+        }
+
+        .mode-filter.metro { background: #e3f2fd; color: #1976d2; }
+        .mode-filter.vline { background: #fff3e0; color: #f57c00; }
+        .mode-filter.tram { background: #f3e5f5; color: #7b1fa2; }
+        .mode-filter.bus { background: #e8f5e9; color: #388e3c; }
+
+        .stats-panel {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .stat-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .refresh-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .auto-refresh-label {
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-indicator.active {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.inactive {
+            background: #dc3545;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 12px;
+        }
+
+        .legend h4 {
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .legend-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .vehicle-popup {
+            min-width: 200px;
+        }
+
+        .vehicle-popup h4 {
+            margin-bottom: 8px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .vehicle-popup .detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .vehicle-popup .label {
+            color: #666;
+        }
+
+        .vehicle-popup .value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .occupancy-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .occupancy-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .occupancy-low { background: #4caf50; }
+        .occupancy-medium { background: #ff9800; }
+        .occupancy-high { background: #f44336; }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Live Vehicle Tracking</h1>
+        <div class="nav-links">
+            <a href="/">Journey Planner</a>
+            <a href="/map">Plan on Map</a>
+            <a href="/live" class="active">Live Vehicles</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/stations">Stations</a>
+            <a href="/about">About</a>
+        </div>
+    </div>
+
+    <div class="map-container">
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class="controls-panel">
+            <h3>Vehicle Tracker</h3>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <div class="mode-filters">
+                <label class="mode-filter metro">
+                    <input type="checkbox" id="filterMetro" checked>
+                    Metro
+                </label>
+                <label class="mode-filter vline">
+                    <input type="checkbox" id="filterVline" checked>
+                    V/Line
+                </label>
+                <label class="mode-filter tram">
+                    <input type="checkbox" id="filterTram" checked>
+                    Tram
+                </label>
+                <label class="mode-filter bus">
+                    <input type="checkbox" id="filterBus" checked>
+                    Bus
+                </label>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat-row">
+                    <span>Total Vehicles</span>
+                    <span class="stat-value" id="statTotal">-</span>
+                </div>
+                <div class="stat-row">
+                    <span>In Transit</span>
+                    <span class="stat-value" id="statInTransit">-</span>
+                </div>
+                <div class="stat-row">
+                    <span>At Stops</span>
+                    <span class="stat-value" id="statAtStop">-</span>
+                </div>
+                <div class="stat-row">
+                    <span>Last Updated</span>
+                    <span class="stat-value" id="statLastUpdate">-</span>
+                </div>
+            </div>
+
+            <div class="refresh-controls">
+                <button class="btn" id="refreshBtn" onclick="refreshAllVehicles()">
+                    Refresh Now
+                </button>
+                <label class="auto-refresh-label">
+                    <input type="checkbox" id="autoRefresh" checked>
+                    <span class="status-indicator active" id="autoRefreshIndicator"></span>
+                    Auto (30s)
+                </label>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h4>Transport Modes</h4>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #1976d2;"></div>
+                <span>Metro Train</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f57c00;"></div>
+                <span>V/Line Train</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #7b1fa2;"></div>
+                <span>Tram</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #388e3c;"></div>
+                <span>Bus</span>
+            </div>
+
+            <div class="legend-section">
+                <h4>Vehicle Status</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4caf50;"></div>
+                    <span>In Transit</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2196f3;"></div>
+                    <span>At Stop</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let vehicleMarkers = {};
+        let refreshInterval = null;
+        const REFRESH_INTERVAL_MS = 30000;
+
+        // Mode colors
+        const MODE_COLORS = {
+            metro: '#1976d2',
+            vline: '#f57c00',
+            tram: '#7b1fa2',
+            bus: '#388e3c'
+        };
+
+        // Statistics tracking
+        let stats = {
+            total: 0,
+            inTransit: 0,
+            atStop: 0
+        };
+
+        // Initialize map
+        function initMap() {
+            // Center on Melbourne CBD
+            map = L.map('map').setView([-37.8136, 144.9631], 12);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Initial load
+            refreshAllVehicles();
+
+            // Start auto-refresh
+            startAutoRefresh();
+        }
+
+        function setupEventListeners() {
+            // Mode filter checkboxes
+            ['Metro', 'Vline', 'Tram', 'Bus'].forEach(mode => {
+                const checkbox = document.getElementById('filter' + mode);
+                checkbox.addEventListener('change', function() {
+                    const filterLabel = this.closest('.mode-filter');
+                    filterLabel.classList.toggle('inactive', !this.checked);
+                    toggleModeVisibility(mode.toLowerCase(), this.checked);
+                });
+            });
+
+            // Auto-refresh toggle
+            document.getElementById('autoRefresh').addEventListener('change', function() {
+                const indicator = document.getElementById('autoRefreshIndicator');
+                if (this.checked) {
+                    startAutoRefresh();
+                    indicator.classList.add('active');
+                    indicator.classList.remove('inactive');
+                } else {
+                    stopAutoRefresh();
+                    indicator.classList.remove('active');
+                    indicator.classList.add('inactive');
+                }
+            });
+        }
+
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(refreshAllVehicles, REFRESH_INTERVAL_MS);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
+        async function refreshAllVehicles() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = 'Loading...';
+
+            showLoading(true);
+            hideError();
+
+            // Reset stats
+            stats = { total: 0, inTransit: 0, atStop: 0 };
+
+            // Clear existing markers for modes being refreshed
+            Object.keys(vehicleMarkers).forEach(key => {
+                const mode = key.split('_')[0];
+                if (document.getElementById('filter' + mode.charAt(0).toUpperCase() + mode.slice(1)).checked) {
+                    if (vehicleMarkers[key]) {
+                        map.removeLayer(vehicleMarkers[key]);
+                        delete vehicleMarkers[key];
+                    }
+                }
+            });
+
+            // Fetch vehicles for each enabled mode
+            const modes = [];
+            if (document.getElementById('filterMetro').checked) modes.push('metro');
+            if (document.getElementById('filterVline').checked) modes.push('vline');
+            if (document.getElementById('filterTram').checked) modes.push('tram');
+            if (document.getElementById('filterBus').checked) modes.push('bus');
+
+            try {
+                const results = await Promise.all(
+                    modes.map(mode => fetchVehicles(mode))
+                );
+
+                // Update statistics display
+                updateStatsDisplay();
+
+            } catch (error) {
+                showError('Failed to fetch vehicle data: ' + error.message);
+            }
+
+            showLoading(false);
+            refreshBtn.disabled = false;
+            refreshBtn.textContent = 'Refresh Now';
+        }
+
+        async function fetchVehicles(mode) {
+            try {
+                const response = await fetch(`/api/vehicles?mode=${mode}`);
+                const data = await response.json();
+
+                if (data.success && data.vehicles) {
+                    displayVehicles(mode, data.vehicles);
+                    return data.vehicles.length;
+                } else if (data.error) {
+                    console.warn(`Error fetching ${mode} vehicles:`, data.error);
+                    return 0;
+                }
+            } catch (error) {
+                console.error(`Failed to fetch ${mode} vehicles:`, error);
+                return 0;
+            }
+        }
+
+        function displayVehicles(mode, vehicles) {
+            const color = MODE_COLORS[mode];
+
+            vehicles.forEach(vehicle => {
+                if (!vehicle.latitude || !vehicle.longitude) return;
+
+                // Skip invalid coordinates
+                if (vehicle.latitude < -90 || vehicle.latitude > 90) return;
+                if (vehicle.longitude < -180 || vehicle.longitude > 180) return;
+
+                const markerId = `${mode}_${vehicle.vehicle_id}`;
+
+                // Determine status color
+                const isAtStop = vehicle.current_status === 'STOPPED_AT';
+                const statusColor = isAtStop ? '#2196f3' : '#4caf50';
+
+                // Create marker with bearing arrow if available
+                const bearing = vehicle.bearing || 0;
+                const icon = createVehicleIcon(color, bearing, isAtStop);
+
+                const marker = L.marker([vehicle.latitude, vehicle.longitude], {
+                    icon: icon,
+                    rotationAngle: bearing
+                }).addTo(map);
+
+                // Create popup content
+                const popupContent = createVehiclePopup(mode, vehicle);
+                marker.bindPopup(popupContent);
+
+                vehicleMarkers[markerId] = marker;
+
+                // Update stats
+                stats.total++;
+                if (isAtStop) {
+                    stats.atStop++;
+                } else {
+                    stats.inTransit++;
+                }
+            });
+        }
+
+        function createVehicleIcon(color, bearing, isAtStop) {
+            const size = isAtStop ? 10 : 12;
+            const borderColor = isAtStop ? '#2196f3' : '#fff';
+
+            return L.divIcon({
+                className: 'vehicle-marker',
+                html: `<div style="
+                    width: ${size}px;
+                    height: ${size}px;
+                    background: ${color};
+                    border: 2px solid ${borderColor};
+                    border-radius: 50%;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                    transform: rotate(${bearing}deg);
+                "></div>`,
+                iconSize: [size + 4, size + 4],
+                iconAnchor: [(size + 4) / 2, (size + 4) / 2]
+            });
+        }
+
+        function createVehiclePopup(mode, vehicle) {
+            const modeName = mode.charAt(0).toUpperCase() + mode.slice(1);
+            const speedText = vehicle.speed_kmh ? `${vehicle.speed_kmh.toFixed(1)} km/h` : 'N/A';
+            const statusText = formatStatus(vehicle.current_status);
+            const bearingText = vehicle.bearing ? `${vehicle.bearing.toFixed(0)}deg` : 'N/A';
+
+            // Occupancy bar
+            let occupancyHtml = '';
+            if (vehicle.occupancy_percentage !== null && vehicle.occupancy_percentage !== undefined) {
+                const occupancyClass = vehicle.occupancy_percentage < 40 ? 'occupancy-low' :
+                                       vehicle.occupancy_percentage < 70 ? 'occupancy-medium' : 'occupancy-high';
+                occupancyHtml = `
+                    <div class="detail">
+                        <span class="label">Occupancy</span>
+                        <span class="value">${vehicle.occupancy_percentage}%</span>
+                    </div>
+                    <div class="occupancy-bar">
+                        <div class="occupancy-fill ${occupancyClass}" style="width: ${vehicle.occupancy_percentage}%"></div>
+                    </div>
+                `;
+            } else if (vehicle.occupancy_status) {
+                occupancyHtml = `
+                    <div class="detail">
+                        <span class="label">Occupancy</span>
+                        <span class="value">${formatOccupancy(vehicle.occupancy_status)}</span>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="vehicle-popup">
+                    <h4>${modeName} - ${vehicle.vehicle_id}</h4>
+                    ${vehicle.label ? `<div class="detail"><span class="label">Label</span><span class="value">${vehicle.label}</span></div>` : ''}
+                    ${vehicle.route_id ? `<div class="detail"><span class="label">Route</span><span class="value">${vehicle.route_id}</span></div>` : ''}
+                    <div class="detail">
+                        <span class="label">Status</span>
+                        <span class="value">${statusText}</span>
+                    </div>
+                    <div class="detail">
+                        <span class="label">Speed</span>
+                        <span class="value">${speedText}</span>
+                    </div>
+                    <div class="detail">
+                        <span class="label">Bearing</span>
+                        <span class="value">${bearingText}</span>
+                    </div>
+                    ${occupancyHtml}
+                    <div class="detail" style="margin-top: 8px; font-size: 11px; color: #999;">
+                        <span class="label">Location</span>
+                        <span class="value">${vehicle.latitude.toFixed(5)}, ${vehicle.longitude.toFixed(5)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatStatus(status) {
+            const statusMap = {
+                'INCOMING_AT': 'Approaching',
+                'STOPPED_AT': 'At Stop',
+                'IN_TRANSIT_TO': 'In Transit'
+            };
+            return statusMap[status] || status || 'Unknown';
+        }
+
+        function formatOccupancy(status) {
+            const occupancyMap = {
+                'EMPTY': 'Empty',
+                'MANY_SEATS_AVAILABLE': 'Many Seats',
+                'FEW_SEATS_AVAILABLE': 'Few Seats',
+                'STANDING_ROOM_ONLY': 'Standing Only',
+                'FULL': 'Full'
+            };
+            return occupancyMap[status] || status;
+        }
+
+        function toggleModeVisibility(mode, visible) {
+            Object.keys(vehicleMarkers).forEach(key => {
+                if (key.startsWith(mode + '_')) {
+                    if (visible) {
+                        vehicleMarkers[key].addTo(map);
+                    } else {
+                        map.removeLayer(vehicleMarkers[key]);
+                    }
+                }
+            });
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statInTransit').textContent = stats.inTransit;
+            document.getElementById('statAtStop').textContent = stats.atStop;
+            document.getElementById('statLastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>

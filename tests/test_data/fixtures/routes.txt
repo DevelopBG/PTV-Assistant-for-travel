@@ -1,0 +1,3 @@
+﻿route_id,route_short_name,route_long_name,route_type,agency_id
+"R1","1","Test Route 1","1","AGENCY1"
+"R2","2","Test Route 2","1","AGENCY1"

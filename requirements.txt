@@ -1,0 +1,20 @@
+certifi==2026.1.4
+charset-normalizer==3.4.4
+gtfs-realtime-bindings==2.0.0
+idna==3.11
+protobuf==6.33.3
+python-dotenv==1.2.1
+requests==2.32.5
+urllib3==2.6.3
+
+# Phase 1: Data processing
+pandas>=2.1.0
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.20.0
+
+# Phase 2: Graph construction
+networkx>=3.0
+
+# GTFS Auto-Update System
+schedule==1.2.0
+tqdm==4.66.1

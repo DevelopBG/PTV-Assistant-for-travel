@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTV Journey Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .form-section {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .journey-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .mode-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .mode-train { background: #e3f2fd; color: #1976d2; }
+        .mode-tram { background: #f3e5f5; color: #7b1fa2; }
+        .mode-bus { background: #e8f5e8; color: #388e3c; }
+        
+        .journey-header {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .journey-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .detail-item {
+            text-align: center;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .stations-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .stations-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .stations-link a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>PTV Journey Planner</h1>
+            <div class="nav-links">
+                <a href="/" class="active">Journey Planner</a>
+                <a href="/map">Plan on Map</a>
+                <a href="/live">Live Vehicles</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/stations">Stations</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h2>Plan Your Journey</h2>
+            <p>Find the best routes across Melbourne's public transport network</p>
+        </div>
+
+        <div class="form-section">
+            <form id="journeyForm">
+                <div class="form-group">
+                    <label for="origin">From (Starting Station)</label>
+                    <input type="text" id="origin" name="origin" placeholder="e.g., Flinders Street" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="destination">To (Destination Station)</label>
+                    <input type="text" id="destination" name="destination" placeholder="e.g., Richmond" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="time">Departure Time</label>
+                        <input type="time" id="time" name="time">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mode">Transport Mode</label>
+                        <select id="mode" name="mode">
+                            <option value="train">Train</option>
+                            <option value="tram">Tram</option>
+                            <option value="bus">Bus</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn" id="planBtn">Plan Journey</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Planning your journey...
+            </div>
+            
+            <div id="result" class="result-section">
+                <!-- Journey results will be displayed here -->
+            </div>
+            
+            <div class="stations-link">
+                <a href="/stations">View All Stations</a> |
+                <a href="/map">Plan on Map</a> |
+                <a href="/live">Live Vehicles</a> |
+                <a href="/dashboard">Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current time as default
+        document.getElementById('time').value = new Date().toTimeString().slice(0,5);
+        
+        document.getElementById('journeyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                origin: formData.get('origin'),
+                destination: formData.get('destination'),
+                time: formData.get('time') || 'now',
+                mode: formData.get('mode')
+            };
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('planBtn').disabled = true;
+            
+            try {
+                const response = await fetch('/api/plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+
+                if (result.success) {
+                    // Store the complete result for later use
+                    window.fullJourneyResult = result;
+                    displayJourney(result.journey, result.has_realtime, result.stations);
+                } else {
+                    displayError(result.error || 'Unknown error occurred');
+                }
+                
+            } catch (error) {
+                displayError('Failed to plan journey. Please try again.');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('planBtn').disabled = false;
+            }
+        });
+        
+        function displayJourney(journey, hasRealtime, stations) {
+            const modeClass = `mode-${journey.mode}`;
+            const realtimeStatus = hasRealtime ?
+                '<span style="color: #4caf50;">[LIVE] Live data</span>' :
+                '<span style="color: #ff9800;">[INFO] Scheduled times</span>';
+
+            // Store journey data globally for "View on Map" button
+            window.currentJourneyData = journey;
+
+            // Generate stations list HTML
+            const stationsHtml = stations.map((station, index) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+                    <div>
+                        <strong>${station.name}</strong><br>
+                        <small style="color: #666;">${station.platform}</small>
+                    </div>
+                    <small style="color: #888;">${station.lat.toFixed(4)}, ${station.lon.toFixed(4)}</small>
+                </div>
+            `).join('');
+
+            const html = `
+                <div class="journey-card">
+                    <div class="mode-badge ${modeClass}">${journey.mode.toUpperCase()}</div>
+                    <div class="journey-header">
+                        ${journey.origin.name} to ${journey.destination.name}
+                    </div>
+
+                    <div class="journey-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Departure</div>
+                            <div class="detail-value">${journey.departure_time}</div>
+                            <div class="detail-label">${journey.origin.platform}</div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">${journey.duration_minutes} min</div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Arrival</div>
+                            <div class="detail-value">${journey.arrival_time}</div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-label">Transfers</div>
+                            <div class="detail-value">${journey.num_transfers}</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                        <strong>Route:</strong> ${journey.modes_used ? journey.modes_used.join(' → ') : 'N/A'}<br>
+                        <strong>Status:</strong> ${realtimeStatus}
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button onclick="viewOnMap()" style="
+                            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+                            color: white;
+                            padding: 12px 30px;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: transform 0.2s;
+                        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🗺️ View Journey on Map
+                        </button>
+                    </div>
+                </div>
+
+                <div class="journey-card" style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 15px; color: #2c3e50;">Available Stations (${stations.length})</h3>
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px;">
+                        ${stationsHtml}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('result').innerHTML = html;
+            document.getElementById('result').style.display = 'block';
+        }
+        
+        function displayError(message) {
+            const html = `<div class="error">❌ ${message}</div>`;
+            document.getElementById('result').innerHTML = html;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function viewOnMap() {
+            if (!window.fullJourneyResult || !window.fullJourneyResult.journey) {
+                alert('No journey data available. Please plan a journey first.');
+                return;
+            }
+
+            // Store the journey part (map expects this structure)
+            const journeyForMap = window.fullJourneyResult.journey;
+
+            sessionStorage.setItem('selectedJourney', JSON.stringify(journeyForMap));
+            console.log('Stored journey data in sessionStorage:', journeyForMap);
+            console.log('Journey legs with trip_id:', journeyForMap.legs.map(l => ({
+                from: l.from_stop,
+                to: l.to_stop,
+                trip_id: l.trip_id,
+                route_id: l.route_id
+            })));
+
+            // Navigate to map page
+            window.location.href = '/map';
+        }
+    </script>
+</body>
+</html>

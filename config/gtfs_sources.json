@@ -1,0 +1,47 @@
+{
+  "modes": {
+    "1": {
+      "name": "V/Line Regional",
+      "url": "https://data.ptv.vic.gov.au/downloads/gtfs-regional-trains.zip",
+      "route_type": 2,
+      "description": "V/Line regional train services"
+    },
+    "2": {
+      "name": "Metro Trains",
+      "url": "https://data.ptv.vic.gov.au/downloads/gtfs.zip",
+      "route_type": 1,
+      "description": "Melbourne metropolitan train network"
+    },
+    "3": {
+      "name": "Trams",
+      "url": "https://data.ptv.vic.gov.au/downloads/gtfs-tram.zip",
+      "route_type": 0,
+      "description": "Melbourne tram network"
+    },
+    "4": {
+      "name": "Buses (Metropolitan)",
+      "url": "https://data.ptv.vic.gov.au/downloads/gtfs-bus.zip",
+      "route_type": 3,
+      "description": "Metropolitan bus services"
+    },
+    "11": {
+      "name": "SkyBus",
+      "url": "https://data.ptv.vic.gov.au/downloads/gtfs-skybus.zip",
+      "route_type": 700,
+      "description": "SkyBus airport services"
+    }
+  },
+  "required_files": [
+    "stops.txt",
+    "routes.txt",
+    "trips.txt",
+    "stop_times.txt"
+  ],
+  "optional_files": [
+    "calendar.txt",
+    "calendar_dates.txt",
+    "transfers.txt",
+    "agency.txt",
+    "shapes.txt"
+  ]
+}

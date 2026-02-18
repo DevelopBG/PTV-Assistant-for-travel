@@ -1,0 +1,4 @@
+﻿stop_id,stop_name,stop_lat,stop_lon,stop_url,location_type,parent_station,wheelchair_boarding,level_id,platform_code
+"1001","Test Station A","-37.8136","144.9631","http://example.com","0","","1","","1"
+"1002","Test Station B","-37.8236","144.9731","http://example.com","0","","1","","2"
+"1003","Fuzzy Test Stop","-37.8336","144.9831","http://example.com","0","","1","","3"

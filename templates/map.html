@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan on Map - PTV Journey Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .map-container {
+            position: relative;
+            height: calc(100vh - 60px);
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            min-width: 300px;
+            max-width: 320px;
+        }
+
+        .map-controls h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .control-group input:focus, .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .status-box {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .status-ok { color: #28a745; }
+        .status-error { color: #dc3545; }
+
+        .route-info {
+            position: absolute;
+            bottom: 20px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            max-width: 350px;
+        }
+
+        .route-info h4 {
+            margin-bottom: 12px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .journey-summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .journey-legs {
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .leg-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .leg-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .leg-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .leg-details {
+            flex: 1;
+        }
+
+        .leg-route {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+
+        .leg-times {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .leg-info {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .mode-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .mode-train { background: #e3f2fd; color: #1976d2; }
+        .mode-tram { background: #f3e5f5; color: #7b1fa2; }
+        .mode-bus { background: #e8f5e9; color: #388e3c; }
+        .mode-vline { background: #fff3e0; color: #f57c00; }
+
+        .station-popup {
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .station-popup h3 {
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .station-popup p {
+            margin: 4px 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .station-popup .btn-group {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .station-popup .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 3px;
+            flex: 1;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 12px;
+        }
+
+        .legend h4 {
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .legend-line {
+            width: 20px;
+            height: 4px;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        .vehicle-layer-toggle {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .vehicle-count {
+            font-size: 11px;
+            color: #666;
+            margin-left: auto;
+        }
+
+        /* Route tooltips */
+        .custom-tooltip {
+            background-color: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .custom-tooltip .route-tooltip {
+            max-width: 200px;
+        }
+
+        /* Marker popups */
+        .marker-popup {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .marker-popup strong {
+            color: #333;
+            font-size: 15px;
+        }
+
+        /* Journey leg highlighting */
+        .journey-leg {
+            transition: opacity 0.3s ease, stroke-width 0.3s ease;
+            cursor: pointer;
+        }
+
+        .journey-leg:hover {
+            opacity: 1 !important;
+            stroke-width: 8;
+        }
+
+        /* Stop markers */
+        .stop-marker {
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stop-marker:hover {
+            opacity: 1 !important;
+            transform: scale(1.2);
+        }
+
+        /* Custom icons */
+        .custom-label-icon,
+        .transfer-icon {
+            border: none;
+            background: transparent;
+        }
+
+        /* Enhanced route line visibility */
+        .leaflet-pane .journey-leg {
+            filter: drop-shadow(0 0 3px rgba(0,0,0,0.3));
+        }
+
+        /* Make transfer lines more visible */
+        .leaflet-pane .journey-leg.leg-transfer {
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.4));
+        }
+
+        /* Stop popup styling */
+        .stop-popup {
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .stop-popup strong {
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .stop-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        /* Realtime Features Styling */
+        .alerts-panel {
+            position: absolute;
+            bottom: 380px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-width: 350px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .alerts-panel h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .alert-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 4px solid;
+            font-size: 12px;
+        }
+
+        .alert-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .alert-severe {
+            background: #ffebee;
+            border-left-color: #d32f2f;
+            color: #b71c1c;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            border-left-color: #f57c00;
+            color: #e65100;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            border-left-color: #1976d2;
+            color: #0d47a1;
+        }
+
+        .alert-header {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .alert-description {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .alert-effect {
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        .journey-vehicle-marker {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .journey-vehicle-marker:hover {
+            transform: scale(1.3);
+        }
+
+        .departure-board {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .departure-board h5 {
+            font-size: 12px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .departure-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px;
+            margin-bottom: 4px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .departure-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .departure-route {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .departure-time {
+            color: #666;
+        }
+
+        .departure-delay {
+            color: #f57c00;
+            font-weight: 600;
+        }
+
+        .departure-ontime {
+            color: #4caf50;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Journey Tracking Styles */
+        #journeyControls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        #startJourneyBtn, #endJourneyBtn {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        #startJourneyBtn {
+            background: #4caf50;
+            color: white;
+        }
+
+        #startJourneyBtn:hover {
+            background: #45a049;
+        }
+
+        #endJourneyBtn {
+            background: #f44336;
+            color: white;
+        }
+
+        #endJourneyBtn:hover {
+            background: #da190b;
+        }
+
+        #journeyProgressPanel {
+            position: absolute;
+            top: 70px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            min-width: 300px;
+            max-width: 350px;
+        }
+
+        #journeyProgressPanel h4 {
+            margin-bottom: 12px;
+            color: #2c3e50;
+            border-bottom: 2px solid #4caf50;
+            padding-bottom: 8px;
+        }
+
+        .progress-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .leg-progress {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4caf50;
+            text-align: center;
+            padding: 8px;
+            background: #e8f5e9;
+            border-radius: 6px;
+        }
+
+        .current-leg-info {
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .leg-route {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .leg-direction {
+            color: #666;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .vehicle-info {
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 6px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .vehicle-label {
+            font-weight: 600;
+            color: #1976d2;
+            font-size: 14px;
+        }
+
+        .vehicle-status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .vehicle-location {
+            font-size: 13px;
+            color: #2c3e50;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .next-stop-info {
+            padding: 10px;
+            background: #fff3e0;
+            border-radius: 6px;
+            border-left: 4px solid #ff9800;
+        }
+
+        .next-stop-name {
+            font-weight: 600;
+            color: #f57c00;
+            font-size: 14px;
+        }
+
+        .next-stop-eta {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .transfer-info {
+            padding: 10px;
+            background: #fce4ec;
+            border-radius: 6px;
+            border-left: 4px solid #e91e63;
+            animation: pulse 2s infinite;
+        }
+
+        .transfer-message {
+            font-weight: 600;
+            color: #c2185b;
+            font-size: 14px;
+        }
+
+        .transfer-wait {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Tracking vehicle marker - distinct from regular vehicles */
+        .tracking-vehicle-marker {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            animation: pulse-marker 1.5s infinite;
+        }
+
+        /* Vehicle arrow marker */
+        .vehicle-arrow-icon {
+            font-size: 28px;
+            line-height: 1;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .leaflet-vehicle-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        @keyframes pulse-marker {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Plan Journey on Map</h1>
+        <div class="nav-links">
+            <a href="/">Journey Planner</a>
+            <a href="/map" class="active">Plan on Map</a>
+            <a href="/live">Live Vehicles</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/stations">Stations</a>
+            <a href="/about">About</a>
+        </div>
+    </div>
+
+    <div class="map-container">
+        <div id="map"></div>
+
+        <div class="map-controls">
+            <h3>Plan Your Journey</h3>
+
+            <div id="stationStatus" class="status-box">
+                Loading stations...
+            </div>
+
+            <div class="control-group">
+                <label for="mapOrigin">From:</label>
+                <input type="text" id="mapOrigin" placeholder="Start typing station name..." autocomplete="off">
+            </div>
+
+            <div class="control-group">
+                <label for="mapDestination">To:</label>
+                <input type="text" id="mapDestination" placeholder="Start typing station name..." autocomplete="off">
+            </div>
+
+            <div class="control-group">
+                <label for="mapMode">Transport Mode:</label>
+                <select id="mapMode">
+                    <option value="train">Train (V/Line)</option>
+                    <option value="tram">Tram</option>
+                    <option value="bus">Bus</option>
+                </select>
+            </div>
+
+            <button class="btn" id="planOnMap">Plan Journey</button>
+            <button class="btn btn-danger" id="clearMap" style="margin-top: 8px;">Clear Route</button>
+
+            <div class="vehicle-layer-toggle">
+                <label class="toggle-label">
+                    <input type="checkbox" id="showVehicles">
+                    Show live vehicles on route
+                    <span class="vehicle-count" id="vehicleCount"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="alerts-panel" id="alertsPanel" style="display: none;">
+            <h4>Service Alerts</h4>
+            <div id="alertsContent">
+                <!-- Alert items will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <div class="route-info" id="routeInfo">
+            <!-- Route information will be displayed here -->
+        </div>
+
+        <!-- Journey Tracking Controls -->
+        <div id="journeyControls" style="display: none;">
+            <button id="startJourneyBtn" class="btn btn-success" onclick="startJourneyTracking()">
+                🚀 Start Journey
+            </button>
+            <button id="endJourneyBtn" class="btn btn-danger" style="display: none;" onclick="endJourneyTracking()">
+                ⏹ End Journey
+            </button>
+        </div>
+
+        <!-- Journey Tracking Progress Panel -->
+        <div id="journeyProgressPanel" style="display: none;">
+            <h4>Journey in Progress</h4>
+
+            <div class="progress-container">
+                <div id="legProgress" class="leg-progress">
+                    Leg 1 of 3
+                </div>
+
+                <div id="currentLegInfo" class="current-leg-info">
+                    <div class="leg-route">Route 86 Tram</div>
+                    <div class="leg-direction">To Melbourne Central</div>
+                </div>
+
+                <div id="vehicleInfo" class="vehicle-info">
+                    <div class="vehicle-label">Vehicle 3042</div>
+                    <div class="vehicle-status">Speed: 35 km/h | Occupancy: Few Seats</div>
+                    <div class="vehicle-location">Approaching Stop: Flinders Street</div>
+                </div>
+
+                <div id="nextStopInfo" class="next-stop-info">
+                    <div class="next-stop-name">Next Stop: Federation Square</div>
+                    <div class="next-stop-eta">ETA: 2 minutes</div>
+                </div>
+
+                <div id="transferInfo" class="transfer-info" style="display: none;">
+                    <div class="transfer-message">Transfer at Flinders Street</div>
+                    <div class="transfer-wait">Next leg in 5 minutes</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <h4>Map Legend</h4>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #1976d2;"></div>
+                <span>Train Station</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #7b1fa2;"></div>
+                <span>Tram Stop</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #388e3c;"></div>
+                <span>Bus Stop</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-line" style="background: #FF5722;"></div>
+                <span>Journey Route</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #28a745;"></div>
+                <span>Origin (A)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #dc3545;"></div>
+                <span>Destination (B)</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let stations = [];
+        let routeLines = [];
+        let originMarker = null;
+        let destinationMarker = null;
+        let stationMarkers = [];
+        let vehicleMarkers = [];
+        let currentJourney = null;
+
+        // Layer groups for organizing map elements (initialized after map creation)
+        let routeLayer = null;
+        let stopMarkersLayer = null;
+        let transferMarkersLayer = null;
+
+        // Mode colors for routes
+        const MODE_COLORS = {
+            'metro': '#1976d2',        // Blue
+            'train': '#1976d2',        // Blue
+            'vline': '#f57c00',        // Orange
+            'regional train': '#f57c00',
+            'tram': '#7b1fa2',         // Purple
+            'bus': '#388e3c',          // Green
+            'walking': '#757575',      // Gray
+            'transfer': '#757575'      // Gray for walking transfers
+        };
+
+        // Initialize map
+        function initMap() {
+            // Center on Melbourne
+            map = L.map('map').setView([-37.8136, 144.9631], 11);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Initialize layer groups
+            routeLayer = L.layerGroup().addTo(map);
+            stopMarkersLayer = L.layerGroup().addTo(map);
+            transferMarkersLayer = L.layerGroup().addTo(map);
+
+            loadStations();
+            setupAutocomplete();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Plan journey button
+            document.getElementById('planOnMap').addEventListener('click', planJourney);
+
+            // Clear map button
+            document.getElementById('clearMap').addEventListener('click', clearAll);
+
+            // Vehicle layer toggle
+            document.getElementById('showVehicles').addEventListener('change', function() {
+                if (this.checked && currentJourney) {
+                    loadVehiclesForRoute();
+                } else {
+                    clearVehicles();
+                }
+            });
+        }
+
+        // Load stations data from API (but don't display markers yet)
+        async function loadStations() {
+            try {
+                const response = await fetch('/api/stations');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                stations = await response.json();
+
+                document.getElementById('stationStatus').innerHTML = `
+                    <span class="status-ok">[OK]</span> ${stations.length} stations loaded
+                `;
+
+                // Don't create markers yet - just store the data for autocomplete
+                // Markers will be created only when a journey is displayed
+
+            } catch (error) {
+                console.error('Failed to load stations:', error);
+                document.getElementById('stationStatus').innerHTML = `
+                    <span class="status-error">[ERROR]</span> Failed to load stations
+                `;
+            }
+        }
+
+        function createStationPopup(station) {
+            return `
+                <div class="station-popup">
+                    <h3>${station.name}</h3>
+                    <p><strong>Platform:</strong> ${station.platform || 'N/A'}</p>
+                    <p><strong>Location:</strong> ${station.lat.toFixed(4)}, ${station.lon.toFixed(4)}</p>
+                    <div class="btn-group">
+                        <button class="btn btn-sm" onclick="selectStation('${station.name}', 'origin')" style="background: #667eea;">
+                            Set Origin
+                        </button>
+                        <button class="btn btn-sm" onclick="selectStation('${station.name}', 'destination')" style="background: #28a745;">
+                            Set Dest
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Setup autocomplete for station inputs
+        function setupAutocomplete() {
+            const originInput = document.getElementById('mapOrigin');
+            const destinationInput = document.getElementById('mapDestination');
+
+            const datalist = document.createElement('datalist');
+            datalist.id = 'stationsList';
+            document.body.appendChild(datalist);
+
+            originInput.setAttribute('list', 'stationsList');
+            destinationInput.setAttribute('list', 'stationsList');
+
+            function updateDatalist() {
+                datalist.innerHTML = '';
+                stations.forEach(station => {
+                    const option = document.createElement('option');
+                    option.value = station.name;
+                    datalist.appendChild(option);
+                });
+            }
+
+            updateDatalist();
+
+            [originInput, destinationInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    const value = this.value.toLowerCase();
+                    if (value.length > 0) {
+                        const filtered = stations.filter(s =>
+                            s.name.toLowerCase().includes(value)
+                        );
+                        datalist.innerHTML = '';
+                        filtered.forEach(station => {
+                            const option = document.createElement('option');
+                            option.value = station.name;
+                            datalist.appendChild(option);
+                        });
+                    } else {
+                        updateDatalist();
+                    }
+                });
+            });
+        }
+
+        function getStationColor(stationName) {
+            if (stationName.includes('Tram')) return '#7b1fa2';
+            if (stationName.includes('Bus')) return '#388e3c';
+            return '#1976d2';
+        }
+
+        function selectStation(stationName, type) {
+            document.getElementById(type === 'origin' ? 'mapOrigin' : 'mapDestination').value = stationName;
+            map.closePopup();
+        }
+
+        async function planJourney() {
+            const origin = document.getElementById('mapOrigin').value.trim();
+            const destination = document.getElementById('mapDestination').value.trim();
+            const mode = document.getElementById('mapMode').value;
+
+            if (!origin || !destination) {
+                alert('Please enter both origin and destination stations');
+                return;
+            }
+
+            const originExists = stations.some(s => s.name.toLowerCase() === origin.toLowerCase());
+            const destExists = stations.some(s => s.name.toLowerCase() === destination.toLowerCase());
+
+            if (!originExists) {
+                alert(`Origin station "${origin}" not found.`);
+                return;
+            }
+            if (!destExists) {
+                alert(`Destination station "${destination}" not found.`);
+                return;
+            }
+
+            const btn = document.getElementById('planOnMap');
+            btn.disabled = true;
+            btn.textContent = 'Planning...';
+
+            try {
+                const response = await fetch('/api/plan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ origin, destination, mode, time: 'now' })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentJourney = result.journey;
+                    displayRouteOnMap(result.journey);
+
+                    // Load vehicles if toggle is on
+                    if (document.getElementById('showVehicles').checked) {
+                        loadVehiclesForRoute();
+                    }
+                } else {
+                    alert('Error: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Journey planning error:', error);
+                alert('Failed to plan journey.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Plan Journey';
+            }
+        }
+
+        function displayRouteOnMap(journeyData) {
+            // Clear previous route
+            clearRouteLayers();
+
+            const journey = journeyData.journey || journeyData;
+
+            // FIX: Update global currentJourney with normalized structure
+            // This ensures startJourneyTracking() can access currentJourney.legs
+            currentJourney = journey;
+
+            const legs = journey.legs;
+
+            if (!legs || legs.length === 0) {
+                alert('No journey legs to display');
+                return;
+            }
+
+            // Draw each leg separately with mode-based colors
+            legs.forEach((leg, legIndex) => {
+                drawLegRoute(leg, legIndex, legs.length);
+            });
+
+            // Display journey-specific stops
+            displayJourneyStops(journey);
+
+            // Add markers for origin, destination, and transfers
+            addJourneyMarkers(journey);
+
+            // Fit map bounds to show entire journey
+            fitMapToJourney(legs);
+
+            // Show route info
+            showRouteInfo(journey);
+
+            // Start realtime updates (service alerts, vehicles, auto-refresh)
+            startRealtimeUpdates();
+
+            // Show "Start Journey" button
+            document.getElementById('journeyControls').style.display = 'block';
+        }
+
+        function clearRouteLayers() {
+            if (routeLayer) routeLayer.clearLayers();
+            if (stopMarkersLayer) stopMarkersLayer.clearLayers();
+            if (transferMarkersLayer) transferMarkersLayer.clearLayers();
+
+            // Clear journey-specific stops
+            if (window.journeyStopsLayer) {
+                window.journeyStopsLayer.clearLayers();
+            }
+
+            // Clear old markers
+            if (originMarker) {
+                map.removeLayer(originMarker);
+                originMarker = null;
+            }
+            if (destinationMarker) {
+                map.removeLayer(destinationMarker);
+                destinationMarker = null;
+            }
+            routeLines.forEach(line => map.removeLayer(line));
+            routeLines = [];
+        }
+
+        function drawLegRoute(leg, legIndex, totalLegs) {
+            // Build coordinate array for this leg
+            const coords = [];
+
+            // Start point
+            if (leg.from_coords) {
+                coords.push([leg.from_coords.lat, leg.from_coords.lon]);
+            }
+
+            // Intermediate stops
+            if (leg.intermediate_coords && leg.intermediate_coords.length > 0) {
+                leg.intermediate_coords.forEach(stop => {
+                    coords.push([stop.lat, stop.lon]);
+                });
+            }
+
+            // End point
+            if (leg.to_coords) {
+                coords.push([leg.to_coords.lat, leg.to_coords.lon]);
+            }
+
+            // Determine color based on mode
+            const modeLower = leg.mode.toLowerCase();
+            const color = leg.is_transfer ? MODE_COLORS['transfer'] :
+                          (MODE_COLORS[modeLower] || '#FF5722');
+
+            // Create polyline with enhanced visibility
+            const polyline = L.polyline(coords, {
+                color: color,
+                weight: leg.is_transfer ? 5 : 10,
+                opacity: leg.is_transfer ? 0.7 : 0.95,
+                dashArray: leg.is_transfer ? '10, 10' : null,
+                className: `journey-leg leg-${legIndex}`,
+                renderer: L.canvas({ padding: 0.5 })
+            });
+
+            // Add tooltip with leg information
+            const tooltipContent = `
+                <div class="route-tooltip">
+                    <strong>${leg.route_name || leg.mode}</strong><br>
+                    ${leg.is_transfer ? 'Walking Transfer' : ''}<br>
+                    Departs: ${leg.departure_time}<br>
+                    Arrives: ${leg.arrival_time}<br>
+                    Duration: ${leg.duration_minutes} min<br>
+                    Stops: ${leg.num_stops}
+                </div>
+            `;
+
+            polyline.bindTooltip(tooltipContent, {
+                sticky: true,
+                className: 'custom-tooltip'
+            });
+
+            routeLayer.addLayer(polyline);
+            routeLines.push(polyline);
+        }
+
+        function displayJourneyStops(journey) {
+            // Clear any existing journey-specific stop markers
+            if (window.journeyStopsLayer) {
+                journeyStopsLayer.clearLayers();
+            } else {
+                window.journeyStopsLayer = L.layerGroup().addTo(map);
+            }
+
+            const journeyStopIds = new Set();
+            const journeyStopData = new Map();
+
+            // Collect all stops from all legs
+            journey.legs.forEach((leg, legIndex) => {
+                // Add origin stop
+                if (leg.from_coords) {
+                    journeyStopIds.add(leg.from_coords.id);
+                    journeyStopData.set(leg.from_coords.id, {
+                        ...leg.from_coords,
+                        legIndex: legIndex,
+                        isOrigin: legIndex === 0,
+                        isTransfer: legIndex > 0
+                    });
+                }
+
+                // Add intermediate stops
+                if (leg.intermediate_coords) {
+                    leg.intermediate_coords.forEach(stop => {
+                        journeyStopIds.add(stop.id);
+                        journeyStopData.set(stop.id, {
+                            ...stop,
+                            legIndex: legIndex,
+                            isOrigin: false,
+                            isTransfer: false
+                        });
+                    });
+                }
+
+                // Add destination stop
+                if (leg.to_coords) {
+                    const isDestination = legIndex === journey.legs.length - 1;
+                    journeyStopIds.add(leg.to_coords.id);
+                    journeyStopData.set(leg.to_coords.id, {
+                        ...leg.to_coords,
+                        legIndex: legIndex,
+                        isOrigin: false,
+                        isTransfer: !isDestination,
+                        isDestination: isDestination
+                    });
+                }
+            });
+
+            // Create markers for journey stops only
+            journeyStopData.forEach((stopData, stopId) => {
+                const color = getStopMarkerColor(stopData);
+                const radius = getStopMarkerRadius(stopData);
+
+                const marker = L.circleMarker([stopData.lat, stopData.lon], {
+                    radius: radius,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+
+                marker.bindPopup(createJourneyStopPopup(stopData));
+                journeyStopsLayer.addLayer(marker);
+            });
+        }
+
+        function getStopMarkerColor(stopData) {
+            if (stopData.isOrigin) return '#4CAF50';      // Green for origin
+            if (stopData.isDestination) return '#F44336'; // Red for destination
+            if (stopData.isTransfer) return '#FF9800';    // Orange for transfers
+            return '#2196F3';                             // Blue for regular stops
+        }
+
+        function getStopMarkerRadius(stopData) {
+            if (stopData.isOrigin || stopData.isDestination) return 8;
+            if (stopData.isTransfer) return 7;
+            return 5;
+        }
+
+        function createJourneyStopPopup(stopData) {
+            // Use the version with departure board support
+            return createJourneyStopPopupWithDepartures(stopData);
+        }
+
+        function addJourneyMarkers(journey) {
+            const legs = journey.legs;
+
+            // Origin marker (green "A")
+            if (legs.length > 0 && legs[0].from_coords) {
+                originMarker = L.marker(
+                    [legs[0].from_coords.lat, legs[0].from_coords.lon],
+                    {
+                        icon: createLabelIcon('A', '#4caf50'),
+                        zIndexOffset: 1000
+                    }
+                ).addTo(map);
+
+                originMarker.bindPopup(`
+                    <div class="marker-popup">
+                        <strong>🟢 Origin</strong><br>
+                        ${legs[0].from_stop}<br>
+                        Departure: ${legs[0].departure_time}
+                    </div>
+                `);
+            }
+
+            // Destination marker (red "B")
+            const lastLeg = legs[legs.length - 1];
+            if (lastLeg && lastLeg.to_coords) {
+                destinationMarker = L.marker(
+                    [lastLeg.to_coords.lat, lastLeg.to_coords.lon],
+                    {
+                        icon: createLabelIcon('B', '#f44336'),
+                        zIndexOffset: 1000
+                    }
+                ).addTo(map);
+
+                destinationMarker.bindPopup(`
+                    <div class="marker-popup">
+                        <strong>🔴 Destination</strong><br>
+                        ${lastLeg.to_stop}<br>
+                        Arrival: ${lastLeg.arrival_time}
+                    </div>
+                `);
+            }
+
+            // Transfer markers
+            for (let i = 0; i < legs.length - 1; i++) {
+                const currentLeg = legs[i];
+                const nextLeg = legs[i + 1];
+
+                // Check if transfer point (current leg end = next leg start)
+                if (currentLeg.to_stop === nextLeg.from_stop && currentLeg.to_coords) {
+                    const transferMarker = L.marker(
+                        [currentLeg.to_coords.lat, currentLeg.to_coords.lon],
+                        {
+                            icon: createTransferIcon(),
+                            zIndexOffset: 999
+                        }
+                    );
+
+                    const waitTime = calculateWaitTime(
+                        currentLeg.arrival_time,
+                        nextLeg.departure_time
+                    );
+
+                    transferMarker.bindPopup(`
+                        <div class="marker-popup">
+                            <strong>🔄 Transfer Point</strong><br>
+                            <strong>${currentLeg.to_stop}</strong><br>
+                            From: ${currentLeg.route_name} (${currentLeg.mode})<br>
+                            To: ${nextLeg.route_name} (${nextLeg.mode})<br>
+                            Wait time: ${waitTime} min
+                        </div>
+                    `);
+
+                    transferMarkersLayer.addLayer(transferMarker);
+                }
+            }
+        }
+
+        function createLabelIcon(label, color) {
+            return L.divIcon({
+                className: 'custom-label-icon',
+                html: `
+                    <div style="
+                        background-color: ${color};
+                        color: white;
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        border: 3px solid white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: 16px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                    ">
+                        ${label}
+                    </div>
+                `,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16],
+                popupAnchor: [0, -16]
+            });
+        }
+
+        function createTransferIcon() {
+            return L.divIcon({
+                className: 'transfer-icon',
+                html: `
+                    <div style="
+                        background-color: #ff9800;
+                        color: white;
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 50%;
+                        border: 2px solid white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 16px;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                    ">
+                        🔄
+                    </div>
+                `,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14],
+                popupAnchor: [0, -14]
+            });
+        }
+
+        function calculateWaitTime(arrivalTime, departureTime) {
+            const [arrHour, arrMin] = arrivalTime.split(':').map(Number);
+            const [depHour, depMin] = departureTime.split(':').map(Number);
+
+            const arrMinutes = arrHour * 60 + arrMin;
+            const depMinutes = depHour * 60 + depMin;
+
+            return Math.max(0, depMinutes - arrMinutes);
+        }
+
+        function fitMapToJourney(legs) {
+            const allCoords = [];
+
+            legs.forEach(leg => {
+                if (leg.from_coords) {
+                    allCoords.push([leg.from_coords.lat, leg.from_coords.lon]);
+                }
+                if (leg.intermediate_coords) {
+                    leg.intermediate_coords.forEach(stop => {
+                        allCoords.push([stop.lat, stop.lon]);
+                    });
+                }
+                if (leg.to_coords) {
+                    allCoords.push([leg.to_coords.lat, leg.to_coords.lon]);
+                }
+            });
+
+            if (allCoords.length > 0) {
+                const bounds = L.latLngBounds(allCoords);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+
+        function showRouteInfo(journey) {
+            const routeInfo = document.getElementById('routeInfo');
+
+            // Build legs HTML
+            let legsHTML = '';
+            if (journey.legs) {
+                journey.legs.forEach((leg, index) => {
+                    const modeLower = leg.mode.toLowerCase();
+                    const color = leg.is_transfer ? MODE_COLORS['transfer'] :
+                                  (MODE_COLORS[modeLower] || '#667eea');
+                    const modeClass = `mode-${modeLower}`;
+
+                    legsHTML += `
+                        <div class="leg-item">
+                            <div class="leg-icon" style="background: ${color}">${index + 1}</div>
+                            <div class="leg-details">
+                                <div class="leg-route">
+                                    <span class="mode-badge ${modeClass}">${leg.mode.toUpperCase()}</span>
+                                    ${leg.route_name}
+                                </div>
+                                <div class="leg-times">
+                                    ${leg.from_stop} &rarr; ${leg.to_stop}
+                                </div>
+                                <div class="leg-info">
+                                    ${leg.departure_time} - ${leg.arrival_time} (${leg.duration_minutes} min)
+                                    ${leg.is_transfer ? '' : ` • ${leg.num_stops} stops`}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            routeInfo.innerHTML = `
+                <h4>Journey Details</h4>
+                <div class="journey-summary">
+                    <div class="summary-item">
+                        <div class="summary-label">Departure</div>
+                        <div class="summary-value">${journey.departure_time}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Arrival</div>
+                        <div class="summary-value">${journey.arrival_time}</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Duration</div>
+                        <div class="summary-value">${journey.duration_minutes} min</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Transfers</div>
+                        <div class="summary-value">${journey.transfers || 0}</div>
+                    </div>
+                </div>
+                <div class="journey-legs">
+                    ${legsHTML}
+                </div>
+            `;
+
+            routeInfo.style.display = 'block';
+        }
+
+        async function loadVehiclesForRoute() {
+            clearVehicles();
+
+            if (!currentJourney) return;
+
+            const mode = currentJourney.mode === 'train' ? 'vline' : currentJourney.mode;
+
+            try {
+                const response = await fetch(`/api/vehicles?mode=${mode}`);
+                const data = await response.json();
+
+                if (data.success && data.vehicles) {
+                    displayVehicles(data.vehicles);
+                    document.getElementById('vehicleCount').textContent = `(${data.vehicles.length})`;
+                }
+            } catch (error) {
+                console.error('Failed to load vehicles:', error);
+            }
+        }
+
+        function displayVehicles(vehicles) {
+            const mode = currentJourney?.mode || 'train';
+            const color = MODE_COLORS[mode] || '#667eea';
+
+            vehicles.forEach(vehicle => {
+                if (!vehicle.latitude || !vehicle.longitude) return;
+
+                const marker = L.circleMarker([vehicle.latitude, vehicle.longitude], {
+                    radius: 5,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 0.9,
+                    fillOpacity: 0.7
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <div class="station-popup">
+                        <h3>Vehicle ${vehicle.vehicle_id}</h3>
+                        <p><strong>Speed:</strong> ${vehicle.speed_kmh ? vehicle.speed_kmh.toFixed(1) + ' km/h' : 'N/A'}</p>
+                        <p><strong>Status:</strong> ${vehicle.current_status || 'Unknown'}</p>
+                    </div>
+                `);
+
+                vehicleMarkers.push(marker);
+            });
+        }
+
+        function clearRoute() {
+            routeLines.forEach(line => map.removeLayer(line));
+            routeLines = [];
+
+            if (originMarker) {
+                map.removeLayer(originMarker);
+                originMarker = null;
+            }
+            if (destinationMarker) {
+                map.removeLayer(destinationMarker);
+                destinationMarker = null;
+            }
+
+            // Clear journey-specific stops
+            if (window.journeyStopsLayer) {
+                window.journeyStopsLayer.clearLayers();
+            }
+
+            // Hide journey controls
+            document.getElementById('journeyControls').style.display = 'none';
+
+            // Stop tracking if active
+            if (journeyTracker.isTracking) {
+                endJourneyTracking();
+            }
+
+            // Clear realtime data (alerts, vehicles, auto-refresh)
+            clearRealtimeData();
+
+            document.getElementById('routeInfo').style.display = 'none';
+        }
+
+        function clearVehicles() {
+            vehicleMarkers.forEach(marker => map.removeLayer(marker));
+            vehicleMarkers = [];
+            document.getElementById('vehicleCount').textContent = '';
+        }
+
+        function clearAll() {
+            clearRoute();
+            clearVehicles();
+            currentJourney = null;
+            document.getElementById('mapOrigin').value = '';
+            document.getElementById('mapDestination').value = '';
+            document.getElementById('showVehicles').checked = false;
+        }
+
+        // ============================================================================
+        // REALTIME FEATURES: Service Alerts, Vehicle Tracking, Departure Boards
+        // ============================================================================
+
+        /**
+         * Fetch and display service alerts for the current journey
+         */
+        async function fetchServiceAlerts() {
+            if (!currentJourney || !currentJourney.legs) {
+                return;
+            }
+
+            // Collect unique modes from journey legs
+            const modes = new Set();
+            currentJourney.legs.forEach(leg => {
+                if (!leg.is_transfer) {
+                    const mode = leg.mode.toLowerCase();
+                    if (mode === 'train' || mode === 'metro') modes.add('metro');
+                    else if (mode === 'tram') modes.add('tram');
+                }
+            });
+
+            if (modes.size === 0) {
+                document.getElementById('alertsPanel').style.display = 'none';
+                return;
+            }
+
+            try {
+                const allAlerts = [];
+
+                // Fetch alerts for each mode in parallel
+                const alertPromises = Array.from(modes).map(async mode => {
+                    const response = await fetch(`/api/alerts?mode=${mode}&active_only=true`);
+                    const data = await response.json();
+                    return data.success ? data.alerts : [];
+                });
+
+                const alertsArrays = await Promise.all(alertPromises);
+                alertsArrays.forEach(alerts => allAlerts.push(...alerts));
+
+                // Filter alerts relevant to journey
+                const relevantAlerts = filterRelevantAlerts(allAlerts);
+                displayServiceAlerts(relevantAlerts);
+            } catch (error) {
+                console.error('Failed to fetch service alerts:', error);
+            }
+        }
+
+        /**
+         * Filter alerts to only those affecting the journey
+         */
+        function filterRelevantAlerts(alerts) {
+            if (!currentJourney || !currentJourney.legs) return [];
+
+            const journeyRoutes = new Set();
+            const journeyStops = new Set();
+            const journeyTrips = new Set();
+
+            currentJourney.legs.forEach(leg => {
+                if (leg.route_id) journeyRoutes.add(leg.route_id);
+                if (leg.trip_id) journeyTrips.add(leg.trip_id);
+                if (leg.from_stop_id) journeyStops.add(leg.from_stop_id);
+                if (leg.to_stop_id) journeyStops.add(leg.to_stop_id);
+            });
+
+            return alerts.filter(alert => {
+                const affectsRoute = alert.affected_routes && alert.affected_routes.some(r => journeyRoutes.has(r));
+                const affectsStop = alert.affected_stops && alert.affected_stops.some(s => journeyStops.has(s));
+                const affectsTrip = alert.informed_entities && alert.informed_entities.some(e =>
+                    e.trip_id && journeyTrips.has(e.trip_id)
+                );
+                return affectsRoute || affectsStop || affectsTrip;
+            });
+        }
+
+        /**
+         * Display service alerts in the alerts panel
+         */
+        function displayServiceAlerts(alerts) {
+            const alertsPanel = document.getElementById('alertsPanel');
+            const alertsContent = document.getElementById('alertsContent');
+
+            if (!alerts || alerts.length === 0) {
+                alertsPanel.style.display = 'none';
+                return;
+            }
+
+            alertsContent.innerHTML = '';
+
+            alerts.forEach(alert => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert-item alert-${alert.severity.toLowerCase()}`;
+
+                let html = `<div class="alert-header">${alert.header_text || 'Service Alert'}</div>`;
+
+                if (alert.description_text) {
+                    let desc = alert.description_text;
+                    if (desc.length > 100) desc = desc.substring(0, 100) + '...';
+                    html += `<div class="alert-description">${desc}</div>`;
+                }
+
+                html += `<div class="alert-effect">${alert.effect.replace(/_/g, ' ')}</div>`;
+                alertDiv.innerHTML = html;
+                alertsContent.appendChild(alertDiv);
+            });
+
+            alertsPanel.style.display = 'block';
+        }
+
+        // Vehicle Tracking Layer
+        let journeyVehiclesLayer = null;
+
+        /**
+         * Fetch and display vehicles for the current journey legs
+         */
+        async function fetchJourneyVehicles() {
+            if (!currentJourney || !currentJourney.legs) {
+                return;
+            }
+
+            if (journeyVehiclesLayer) {
+                journeyVehiclesLayer.clearLayers();
+            } else {
+                journeyVehiclesLayer = L.layerGroup().addTo(map);
+            }
+
+            const tripIds = currentJourney.legs
+                .filter(leg => !leg.is_transfer && leg.trip_id)
+                .map(leg => ({ trip_id: leg.trip_id, mode: leg.mode.toLowerCase() }));
+
+            if (tripIds.length === 0) return;
+
+            try {
+                const vehiclePromises = tripIds.map(async ({ trip_id, mode }) => {
+                    let apiMode = mode;
+                    if (mode === 'train') apiMode = 'vline';
+                    else if (mode === 'regional train') apiMode = 'vline';
+
+                    const response = await fetch(`/api/vehicles/trip/${trip_id}?mode=${apiMode}`);
+                    const data = await response.json();
+                    return data.success && data.vehicles.length > 0 ? data.vehicles[0] : null;
+                });
+
+                const vehicles = (await Promise.all(vehiclePromises)).filter(v => v !== null);
+                displayJourneyVehicles(vehicles);
+            } catch (error) {
+                console.error('Failed to fetch journey vehicles:', error);
+            }
+        }
+
+        /**
+         * Display vehicle markers for journey legs
+         */
+        function displayJourneyVehicles(vehicles) {
+            if (!journeyVehiclesLayer) return;
+
+            vehicles.forEach(vehicle => {
+                if (!vehicle.latitude || !vehicle.longitude) return;
+
+                const color = getVehicleColor(vehicle);
+                const marker = L.circleMarker([vehicle.latitude, vehicle.longitude], {
+                    radius: 7,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.9,
+                    className: 'journey-vehicle-marker'
+                }).addTo(journeyVehiclesLayer);
+
+                const popupContent = createVehiclePopup(vehicle);
+                marker.bindPopup(popupContent);
+            });
+        }
+
+        function getVehicleColor(vehicle) {
+            if (vehicle.route_id) {
+                const routeId = vehicle.route_id.toLowerCase();
+                if (routeId.includes('tram')) return MODE_COLORS['tram'];
+                if (routeId.includes('bus')) return MODE_COLORS['bus'];
+            }
+            return MODE_COLORS['metro'];
+        }
+
+        function createVehiclePopup(vehicle) {
+            const speed = vehicle.speed_kmh ? `${vehicle.speed_kmh.toFixed(1)} km/h` : 'N/A';
+            const status = vehicle.current_status ? formatVehicleStatus(vehicle.current_status) : 'Unknown';
+
+            let occupancyHtml = '';
+            if (vehicle.occupancy_percentage !== null && vehicle.occupancy_percentage !== undefined) {
+                occupancyHtml = `<p><strong>Occupancy:</strong> ${vehicle.occupancy_percentage}%</p>`;
+            } else if (vehicle.occupancy_status) {
+                occupancyHtml = `<p><strong>Occupancy:</strong> ${formatOccupancyStatus(vehicle.occupancy_status)}</p>`;
+            }
+
+            return `
+                <div class="vehicle-popup">
+                    <h4>Vehicle ${vehicle.vehicle_id}</h4>
+                    ${vehicle.label ? `<p><strong>Label:</strong> ${vehicle.label}</p>` : ''}
+                    ${vehicle.route_id ? `<p><strong>Route:</strong> ${vehicle.route_id}</p>` : ''}
+                    <p><strong>Speed:</strong> ${speed}</p>
+                    <p><strong>Status:</strong> ${status}</p>
+                    ${occupancyHtml}
+                </div>
+            `;
+        }
+
+        function formatVehicleStatus(status) {
+            const statusMap = {
+                'INCOMING_AT': 'Approaching Stop',
+                'STOPPED_AT': 'At Stop',
+                'IN_TRANSIT_TO': 'In Transit'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatOccupancyStatus(status) {
+            const occupancyMap = {
+                'EMPTY': 'Empty',
+                'MANY_SEATS_AVAILABLE': 'Many Seats',
+                'FEW_SEATS_AVAILABLE': 'Few Seats',
+                'STANDING_ROOM_ONLY': 'Standing Only',
+                'FULL': 'Full'
+            };
+            return occupancyMap[status] || status;
+        }
+
+        /**
+         * Fetch departures for a specific stop
+         * TODO: Implement backend endpoint /api/departures/{stop_id}?mode={mode}
+         */
+        async function fetchStopDepartures(stopId, mode) {
+            try {
+                // Placeholder - needs backend implementation
+                return [];
+            } catch (error) {
+                console.error(`Failed to fetch departures for stop ${stopId}:`, error);
+                return [];
+            }
+        }
+
+        /**
+         * Update stop popup to include departure board
+         */
+        function createJourneyStopPopupWithDepartures(stopData) {
+            let type = 'Stop';
+            if (stopData.isOrigin) type = 'Origin';
+            else if (stopData.isDestination) type = 'Destination';
+            else if (stopData.isTransfer) type = 'Transfer Point';
+
+            let html = `
+                <div class="stop-popup">
+                    <strong>${stopData.name}</strong><br>
+                    <span class="stop-type">${type}</span><br>
+                    <small>Stop ID: ${stopData.id}</small>
+                    <div class="departure-board" id="departures-${stopData.id}">
+                        <h5>Next Departures <span class="loading-spinner" style="display: none;" id="loading-${stopData.id}"></span></h5>
+                        <div id="departure-list-${stopData.id}">
+                            <button onclick="loadDepartures('${stopData.id}', '${stopData.mode || 'metro'}')"
+                                    class="btn btn-sm" style="width: 100%; padding: 4px 8px; font-size: 11px;">
+                                Load Departures
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        window.loadDepartures = async function(stopId, mode) {
+            const loadingSpinner = document.getElementById(`loading-${stopId}`);
+            const departureList = document.getElementById(`departure-list-${stopId}`);
+
+            if (loadingSpinner) loadingSpinner.style.display = 'inline-block';
+
+            const departures = await fetchStopDepartures(stopId, mode);
+
+            if (loadingSpinner) loadingSpinner.style.display = 'none';
+
+            if (departures.length === 0) {
+                departureList.innerHTML = '<div style="font-size: 11px; color: #666;">No upcoming departures</div>';
+                return;
+            }
+
+            departureList.innerHTML = '';
+            departures.slice(0, 5).forEach(dep => {
+                const depDiv = document.createElement('div');
+                depDiv.className = 'departure-item';
+
+                const delayClass = dep.delay > 0 ? 'departure-delay' : 'departure-ontime';
+                const delayText = dep.delay > 0 ? `+${Math.floor(dep.delay / 60)} min` : 'On time';
+
+                depDiv.innerHTML = `
+                    <div>
+                        <div class="departure-route">${dep.route_name}</div>
+                        <div class="departure-time">${dep.departure_time}</div>
+                    </div>
+                    <div class="${delayClass}">${delayText}</div>
+                `;
+
+                departureList.appendChild(depDiv);
+            });
+        };
+
+        // Auto-Refresh Management
+        let realtimeRefreshInterval = null;
+
+        /**
+         * Start auto-refreshing realtime data every 30 seconds
+         */
+        function startRealtimeUpdates() {
+            stopRealtimeUpdates();
+
+            if (!currentJourney) return;
+
+            updateRealtimeData();
+            realtimeRefreshInterval = setInterval(updateRealtimeData, 30000);
+            console.log('Started realtime updates (30s interval)');
+        }
+
+        /**
+         * Stop auto-refreshing realtime data
+         */
+        function stopRealtimeUpdates() {
+            if (realtimeRefreshInterval) {
+                clearInterval(realtimeRefreshInterval);
+                realtimeRefreshInterval = null;
+                console.log('Stopped realtime updates');
+            }
+        }
+
+        /**
+         * Update all realtime data (alerts, vehicles)
+         */
+        async function updateRealtimeData() {
+            if (!currentJourney) {
+                stopRealtimeUpdates();
+                return;
+            }
+
+            try {
+                await Promise.all([
+                    fetchServiceAlerts(),
+                    fetchJourneyVehicles()
+                ]);
+            } catch (error) {
+                console.error('Error updating realtime data:', error);
+            }
+        }
+
+        /**
+         * Clear all realtime data displays
+         */
+        function clearRealtimeData() {
+            document.getElementById('alertsPanel').style.display = 'none';
+
+            if (journeyVehiclesLayer) {
+                journeyVehiclesLayer.clearLayers();
+            }
+
+            stopRealtimeUpdates();
+        }
+
+        // ============================================================================
+        // END REALTIME FEATURES
+        // ============================================================================
+
+        /**
+         * Load and display journey from sessionStorage if available
+         */
+        function loadJourneyFromStorage() {
+            const storedData = sessionStorage.getItem('selectedJourney');
+
+            if (!storedData) {
+                // No stored journey - normal map behavior
+                return;
+            }
+
+            try {
+                const journeyData = JSON.parse(storedData);
+
+                console.log('Loading journey from sessionStorage:', journeyData);
+
+                // Clear the stored data (one-time use)
+                sessionStorage.removeItem('selectedJourney');
+
+                // Set currentJourney for tracking functionality
+                currentJourney = journeyData;
+
+                // Pre-fill origin and destination fields (optional - for user reference)
+                const originInput = document.getElementById('mapOrigin');
+                const destInput = document.getElementById('mapDestination');
+
+                if (originInput && journeyData.origin?.name) {
+                    originInput.value = journeyData.origin.name;
+                }
+                if (destInput && journeyData.destination?.name) {
+                    destInput.value = journeyData.destination.name;
+                }
+
+                // Display the journey on the map
+                displayRouteOnMap(journeyData);
+
+                // Show route info panel
+                showRouteInfo(journeyData);
+
+            } catch (error) {
+                console.error('Error loading journey from storage:', error);
+                // Fail silently - just show normal map
+            }
+        }
+
+        // ============================================================================
+        // LIVE JOURNEY TRACKING
+        // ============================================================================
+
+        // Journey Tracking State Management
+        let journeyTracker = {
+            isTracking: false,
+            currentLegIndex: 0,
+            journeyStartTime: null,
+            trackingInterval: null,
+            currentVehicle: null,
+            trackingVehicleMarker: null
+        };
+
+        /**
+         * Start tracking the journey
+         */
+        function startJourneyTracking() {
+            if (!currentJourney || !currentJourney.legs) {
+                alert('No journey to track. Please plan a journey first.');
+                return;
+            }
+
+            // Initialize tracking state
+            journeyTracker.isTracking = true;
+            journeyTracker.currentLegIndex = 0;
+            journeyTracker.journeyStartTime = new Date();
+
+            // Save to localStorage for persistence
+            saveTrackingState();
+
+            // Show/hide UI elements
+            document.getElementById('startJourneyBtn').style.display = 'none';
+            document.getElementById('endJourneyBtn').style.display = 'inline-block';
+            document.getElementById('journeyProgressPanel').style.display = 'block';
+
+            // Start tracking updates (every 5 seconds)
+            updateJourneyProgress();
+            journeyTracker.trackingInterval = setInterval(updateJourneyProgress, 5000);
+
+            console.log('Started journey tracking');
+        }
+
+        /**
+         * Stop tracking the journey
+         */
+        function endJourneyTracking() {
+            journeyTracker.isTracking = false;
+            clearInterval(journeyTracker.trackingInterval);
+
+            // Hide tracking UI
+            document.getElementById('startJourneyBtn').style.display = 'inline-block';
+            document.getElementById('endJourneyBtn').style.display = 'none';
+            document.getElementById('journeyProgressPanel').style.display = 'none';
+
+            // Remove tracking vehicle marker
+            if (journeyTracker.trackingVehicleMarker) {
+                map.removeLayer(journeyTracker.trackingVehicleMarker);
+                journeyTracker.trackingVehicleMarker = null;
+            }
+
+            // Clear localStorage
+            localStorage.removeItem('journeyTracking');
+
+            console.log('Stopped journey tracking');
+        }
+
+        /**
+         * Helper to get API mode from journey mode
+         */
+        function getModeForAPI(mode) {
+            const modeLower = mode.toLowerCase();
+            if (modeLower === 'train' || modeLower === 'regional train') return 'vline';
+            if (modeLower === 'metro') return 'metro';
+            if (modeLower === 'tram') return 'tram';
+            if (modeLower === 'bus') return 'bus';
+            return 'metro';
+        }
+
+        /**
+         * Update journey progress - called every 5 seconds during tracking
+         */
+        async function updateJourneyProgress() {
+            if (!journeyTracker.isTracking || !currentJourney) {
+                endJourneyTracking();
+                return;
+            }
+
+            const legs = currentJourney.legs;
+            const currentLeg = legs[journeyTracker.currentLegIndex];
+
+            // Skip walking transfers
+            if (currentLeg.is_transfer) {
+                showTransferInfo(currentLeg);
+                checkTransferCompletion(currentLeg);
+                return;
+            }
+
+            // Fetch vehicle for current leg
+            try {
+                const apiMode = getModeForAPI(currentLeg.mode);
+                const response = await fetch(`/api/vehicles/trip/${currentLeg.trip_id}?mode=${apiMode}`);
+                const data = await response.json();
+
+                if (data.success && data.vehicles && data.vehicles.length > 0) {
+                    const vehicle = data.vehicles[0];
+                    journeyTracker.currentVehicle = vehicle;
+
+                    // Update UI with vehicle data
+                    updateTrackingUI(vehicle, currentLeg);
+
+                    // Update vehicle marker on map
+                    updateTrackingVehicleMarker(vehicle);
+
+                    // Check if we've reached destination
+                    checkLegCompletion(vehicle, currentLeg);
+
+                    // Save state
+                    saveTrackingState();
+                } else {
+                    // No vehicle found - might be scheduled but not started yet
+                    showWaitingForVehicle(currentLeg);
+                }
+            } catch (error) {
+                console.error('Failed to fetch tracking vehicle:', error);
+            }
+        }
+
+        /**
+         * Update the journey progress panel UI
+         */
+        function updateTrackingUI(vehicle, leg) {
+            const totalLegs = currentJourney.legs.filter(l => !l.is_transfer).length;
+            const currentLegNumber = journeyTracker.currentLegIndex + 1;
+
+            // Update leg progress
+            document.getElementById('legProgress').textContent =
+                `Leg ${currentLegNumber} of ${totalLegs}`;
+
+            // Update current leg info
+            document.getElementById('currentLegInfo').innerHTML = `
+                <div class="leg-route">${leg.route_name || leg.mode}</div>
+                <div class="leg-direction">To ${leg.to_stop}</div>
+            `;
+
+            // Update vehicle info
+            const speed = vehicle.speed_kmh ? `${vehicle.speed_kmh.toFixed(1)} km/h` : 'N/A';
+            const occupancy = formatOccupancyStatus(vehicle.occupancy_status || 'Unknown');
+            const locationText = getVehicleLocationText(vehicle);
+
+            document.getElementById('vehicleInfo').innerHTML = `
+                <div class="vehicle-label">Vehicle ${vehicle.label || vehicle.vehicle_id}</div>
+                <div class="vehicle-status">Speed: ${speed} | Occupancy: ${occupancy}</div>
+                <div class="vehicle-location">${locationText}</div>
+            `;
+
+            // Update next stop info
+            const nextStopInfo = getNextStopInfo(vehicle, leg);
+            document.getElementById('nextStopInfo').innerHTML = `
+                <div class="next-stop-name">Next Stop: ${nextStopInfo.name}</div>
+                <div class="next-stop-eta">${nextStopInfo.eta}</div>
+            `;
+
+            // Hide transfer info
+            document.getElementById('transferInfo').style.display = 'none';
+        }
+
+        function getVehicleLocationText(vehicle) {
+            const status = vehicle.current_status;
+            const stopName = vehicle.stop_name || 'Unknown';
+
+            if (status === 'STOPPED_AT') return `Stopped at: ${stopName}`;
+            if (status === 'INCOMING_AT') return `Approaching: ${stopName}`;
+            if (status === 'IN_TRANSIT_TO') return `In transit to: ${stopName}`;
+            return 'In transit';
+        }
+
+        function getNextStopInfo(vehicle, leg) {
+            // Get intermediate stops for this leg
+            const stops = leg.intermediate_coords || [];
+            const currentSeq = vehicle.current_stop_sequence || 0;
+
+            // Find next stop based on sequence
+            const nextStop = stops.find(s => s.sequence > currentSeq);
+
+            if (nextStop) {
+                return {
+                    name: nextStop.name,
+                    eta: 'Arriving soon' // TODO: Calculate actual ETA from distance/speed
+                };
+            }
+
+            // If no next stop, we're approaching destination
+            return {
+                name: leg.to_stop,
+                eta: 'Final stop'
+            };
+        }
+
+        function showWaitingForVehicle(leg) {
+            document.getElementById('vehicleInfo').innerHTML = `
+                <div class="vehicle-label">Waiting for vehicle...</div>
+                <div class="vehicle-status">${leg.route_name || leg.mode} - ${leg.departure_time}</div>
+                <div class="vehicle-location">Vehicle not yet started</div>
+            `;
+        }
+
+        /**
+         * Check if current leg is complete and advance to next
+         */
+        function checkLegCompletion(vehicle, leg) {
+            // Check if vehicle has reached destination stop
+            const reachedDestination =
+                vehicle.stop_id === leg.to_stop_id ||
+                (vehicle.current_status === 'STOPPED_AT' &&
+                 vehicle.current_stop_sequence >= leg.to_stop_sequence);
+
+            if (reachedDestination) {
+                // Show arrival notification
+                showArrivalNotification(leg.to_stop);
+
+                // Advance to next leg
+                journeyTracker.currentLegIndex++;
+
+                // Check if journey is complete
+                if (journeyTracker.currentLegIndex >= currentJourney.legs.length) {
+                    completeJourney();
+                } else {
+                    // Continue to next leg (or transfer)
+                    updateJourneyProgress();
+                }
+            }
+        }
+
+        /**
+         * Show arrival notification
+         */
+        function showArrivalNotification(stopName) {
+            // Create browser notification if permission granted
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Arrived at Stop', {
+                    body: `You've arrived at ${stopName}`,
+                    icon: '/static/icon.png' // Optional
+                });
+            }
+
+            // Also show on-page notification
+            const notification = document.createElement('div');
+            notification.className = 'arrival-notification';
+            notification.innerHTML = `
+                <strong>🎉 Arrived!</strong><br>
+                ${stopName}
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #4caf50;
+                color: white;
+                padding: 20px 30px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-size: 18px;
+                text-align: center;
+            `;
+
+            document.body.appendChild(notification);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        /**
+         * Complete the journey
+         */
+        function completeJourney() {
+            showArrivalNotification(currentJourney.legs[currentJourney.legs.length - 1].to_stop);
+
+            // Show completion message
+            setTimeout(() => {
+                alert('Journey complete! You have arrived at your destination.');
+                endJourneyTracking();
+            }, 3000);
+        }
+
+        /**
+         * Show transfer information
+         */
+        function showTransferInfo(transferLeg) {
+            // Hide regular vehicle info
+            document.getElementById('vehicleInfo').style.display = 'none';
+            document.getElementById('nextStopInfo').style.display = 'none';
+
+            // Show transfer info
+            document.getElementById('transferInfo').style.display = 'block';
+            document.getElementById('transferInfo').innerHTML = `
+                <div class="transfer-message">Walking Transfer</div>
+                <div class="transfer-wait">Walk to ${transferLeg.to_stop}</div>
+                <div class="transfer-duration">Duration: ${transferLeg.duration_minutes} minutes</div>
+            `;
+        }
+
+        /**
+         * Check if transfer is complete (time-based)
+         */
+        function checkTransferCompletion(transferLeg) {
+            // For walking transfers, show button to manually advance
+            const advanceBtn = document.getElementById('advanceToNextLeg');
+            if (!advanceBtn) {
+                const btn = document.createElement('button');
+                btn.id = 'advanceToNextLeg';
+                btn.className = 'btn btn-primary';
+                btn.textContent = 'Continue to Next Leg';
+                btn.style.cssText = 'width: 100%; margin-top: 10px; padding: 8px; font-size: 14px;';
+                btn.onclick = () => {
+                    journeyTracker.currentLegIndex++;
+                    btn.remove();
+                    // Show vehicle info again
+                    document.getElementById('vehicleInfo').style.display = 'block';
+                    document.getElementById('nextStopInfo').style.display = 'block';
+                    updateJourneyProgress();
+                };
+                document.getElementById('transferInfo').appendChild(btn);
+            }
+        }
+
+        /**
+         * Update or create tracking vehicle marker on map
+         * Uses directional arrow pointing in direction of travel
+         */
+        function updateTrackingVehicleMarker(vehicle) {
+            if (!vehicle.latitude || !vehicle.longitude) return;
+
+            // Remove old marker
+            if (journeyTracker.trackingVehicleMarker) {
+                map.removeLayer(journeyTracker.trackingVehicleMarker);
+            }
+
+            const color = getVehicleColor(vehicle);
+            const bearing = vehicle.bearing || 0;
+
+            // Create arrow icon with rotation (Unicode arrow: ▲)
+            const arrowIcon = L.divIcon({
+                className: 'leaflet-vehicle-arrow',
+                html: `<div class="vehicle-arrow-icon" style="color: ${color}; transform: rotate(${bearing}deg);">▲</div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+
+            // Create marker with arrow
+            journeyTracker.trackingVehicleMarker = L.marker(
+                [vehicle.latitude, vehicle.longitude],
+                { icon: arrowIcon, zIndexOffset: 1000 }
+            ).addTo(map);
+
+            // Add popup with vehicle info
+            const popupContent = createVehiclePopup(vehicle);
+            journeyTracker.trackingVehicleMarker.bindPopup(popupContent);
+
+            // Center map on vehicle
+            map.panTo([vehicle.latitude, vehicle.longitude]);
+        }
+
+        /**
+         * Save tracking state to localStorage
+         */
+        function saveTrackingState() {
+            const state = {
+                isTracking: journeyTracker.isTracking,
+                currentLegIndex: journeyTracker.currentLegIndex,
+                journeyStartTime: journeyTracker.journeyStartTime,
+                journey: currentJourney
+            };
+
+            localStorage.setItem('journeyTracking', JSON.stringify(state));
+        }
+
+        /**
+         * Restore tracking state from localStorage
+         */
+        function restoreTrackingState() {
+            const stateStr = localStorage.getItem('journeyTracking');
+            if (!stateStr) return false;
+
+            try {
+                const state = JSON.parse(stateStr);
+
+                // Check if tracking was active and not too old (e.g., within 24 hours)
+                const startTime = new Date(state.journeyStartTime);
+                const hoursSinceStart = (new Date() - startTime) / (1000 * 60 * 60);
+
+                if (state.isTracking && hoursSinceStart < 24) {
+                    // Restore journey and tracking state
+                    currentJourney = state.journey;
+                    journeyTracker.currentLegIndex = state.currentLegIndex;
+                    journeyTracker.journeyStartTime = startTime;
+
+                    // Display journey on map
+                    displayRouteOnMap(currentJourney);
+
+                    // Resume tracking
+                    startJourneyTracking();
+
+                    console.log('Restored journey tracking from localStorage');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Failed to restore tracking state:', error);
+                localStorage.removeItem('journeyTracking');
+            }
+
+            return false;
+        }
+
+        /**
+         * Request notification permission on page load
+         */
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    console.log('Notification permission:', permission);
+                });
+            }
+        }
+
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+
+            // Request notification permission
+            requestNotificationPermission();
+
+            // Try to restore tracking state
+            if (!restoreTrackingState()) {
+                // No saved tracking, check if journey was passed from Journey Planner
+                loadJourneyFromStorage();
+            }
+        });
+    </script>
+</body>
+</html>
